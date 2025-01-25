@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useStateContext } from "../context";
 import { CountBox, CustomButton, Loader } from "../components";
 import { calculateBarPercentage, daysLeft } from "../utils";
-// import { profile, thirdweb } from "../assets";
+import { profile } from "../assets";
 
 const CampaignDetails = () => {
   const { state } = useLocation();
