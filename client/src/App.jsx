@@ -1,9 +1,9 @@
-import React from 'react';
-import { Route, Routes } from 'react-router-dom';
+import React from "react";
+import { Route, Routes } from "react-router-dom";
 
-import { Sidebar, Navbar } from './components';
-import { CampaignDetails, CreateCampaign, Home, Profile } from './pages';
-import LandingPage from './pages/landingPage'; // Import LandingPage
+import { Sidebar, Navbar } from "./components";
+import { CampaignDetails, CreateCampaign, Home, Profile } from "./pages";
+import LandingPage from "./pages/landingPage"; // Import LandingPage
 
 const App = () => {
   return (
@@ -24,7 +24,7 @@ const App = () => {
         </Routes>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;

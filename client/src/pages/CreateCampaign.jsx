@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useStateContext } from "../context";
-import { money } from "../assets";
+//import { money } from "../assets";
 import { CustomButton, FormField, Loader } from "../components";
 import { checkIfImage } from "../utils";
 
@@ -68,6 +68,7 @@ const CreateCampaign = () => {
             handleChange={(e) => handleFormFieldChange("title", e)}
           />
         </div>
+
         <FormField
           labelName="Story *"
           placeholder="Write your story"
@@ -79,6 +80,7 @@ const CreateCampaign = () => {
         {/* <div className="w-full flex justify-start items-center p-4 bg-[#8c6dfd] h-[120px] rounded-[10px]">
           <img
             src={money}
+
             alt="money"
             className="w-[40px] h-[40px] object-contain"
           />
@@ -103,6 +105,7 @@ const CreateCampaign = () => {
             handleChange={(e) => handleFormFieldChange("deadline", e)}
           />
         </div>
+
         <FormField
           labelName="Campaign image *"
           placeholder="Place image URL of your campaign"
@@ -110,6 +113,7 @@ const CreateCampaign = () => {
           value={form.image}
           handleChange={(e) => handleFormFieldChange("image", e)}
         />
+
         <div className="flex justify-center items-center mt-[40px]">
           <CustomButton
             btnType="submit"
