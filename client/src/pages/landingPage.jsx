@@ -2,20 +2,22 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { money } from "../assets";
 import { CustomButton } from "../components";
+//import { landingPage } from ".";
 
-const Home = () => {
+const LandingPage = () => {
   const navigate = useNavigate();
 
   return (
     <div className="bg-[#1c1c24] flex flex-col justify-center items-center min-h-screen p-4 rounded-[10px]">
       <div className="flex flex-col items-center text-center">
         <h1 className="font-epilogue font-bold sm:text-[50px] text-[40px] leading-[60px] text-white">
-          CharityGuard 
+          CharityGuard
         </h1>
         <p className="font-epilogue font-normal text-[18px] text-[#808191] mt-4 max-w-[600px]">
-            A decentralized Blockchain based platform for creating and supporting charitable causes.
+          A decentralized Blockchain based platform for creating and supporting
+          charitable causes.
         </p>
-        
+
         <div className="flex flex-wrap justify-center gap-4 mt-8">
           <CustomButton
             btnType="button"
@@ -49,7 +51,8 @@ const Home = () => {
             Transparency
           </h3>
           <p className="font-epilogue font-normal text-[16px] text-[#808191] mt-2">
-            Every transaction is recorded on the blockchain, ensuring complete transparency.
+            Every transaction is recorded on the blockchain, ensuring complete
+            transparency.
           </p>
         </div>
         <div className="bg-[#3a3a43] p-6 rounded-[10px] max-w-[300px]">
@@ -57,7 +60,8 @@ const Home = () => {
             Security
           </h3>
           <p className="font-epilogue font-normal text-[16px] text-[#808191] mt-2">
-            Your contributions are secure and directly support the causes you care about.
+            Your contributions are secure and directly support the causes you
+            care about.
           </p>
         </div>
         <div className="bg-[#3a3a43] p-6 rounded-[10px] max-w-[300px]">
@@ -65,7 +69,8 @@ const Home = () => {
             Community
           </h3>
           <p className="font-epilogue font-normal text-[16px] text-[#808191] mt-2">
-            Join a global community of changemakers working together to make a difference.
+            Join a global community of changemakers working together to make a
+            difference.
           </p>
         </div>
       </div>
@@ -73,4 +78,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default LandingPage;
