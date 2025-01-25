@@ -2,9 +2,11 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { money } from "../assets";
 import { CustomButton } from "../components";
+import { landingPage } from ".";
 
-const Home = () => {
+const LandingPage = () => {
   const navigate = useNavigate();
+  
 
   return (
     <div className="bg-[#1c1c24] flex flex-col justify-center items-center min-h-screen p-4 rounded-[10px]">
@@ -73,4 +75,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default LandingPage;

@@ -31,7 +31,7 @@ const CreateCampaign = () => {
         setIsLoading(true);
         await createCampaign({ ...form, target: form.target });
         setIsLoading(false);
-        navigate("/");
+        navigate("/home");
       } else {
         alert("Provide valid image URL");
         setForm({ ...form, image: "" });
