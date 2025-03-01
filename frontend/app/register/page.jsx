@@ -7,11 +7,13 @@ const RegisterPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
-  const [redirect, setRedirect] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage("");
+    
     // Map the selected role to uppercase (matching prisma enum)
     const mappedRole = role.toUpperCase(); // "DONOR", "CHARITY", etc.
 
@@ -21,19 +23,20 @@ const RegisterPage = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, role: mappedRole }),
       });
-      if (!res.ok) throw new Error("Registration failed");
-      // Usually you'd store token if returned by register as well
-      console.log("Form submitted!");
-      setRedirect(true);
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || "Registration failed");
+      }
+
+      // Redirect to verification page with email pre-filled
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err) {
       console.error(err);
-      alert("Registration error");
+      setErrorMessage(err.message);
     }
   };
-
-  if (redirect) {
-    router.push("/home");
-  }
 
   return (
     <div className="bg-[#1c1c24] flex flex-col justify-center items-center min-h-screen p-4 rounded-[10px]">
@@ -75,9 +78,7 @@ const RegisterPage = () => {
               <option value="charity">Charity</option>
               <option value="fundraiser">Fundraiser</option>
               <option value="donor">Donor</option>
-              <option value="recipient">Recipient</option>
             </select>
-
             <CustomButton
               btnType="submit"
               title="Register"
@@ -86,12 +87,13 @@ const RegisterPage = () => {
           </div>
         </form>
 
+        {errorMessage && (
+          <p className="font-epilogue font-normal text-[16px] text-red-500 mt-6">{errorMessage}</p>
+        )}
+
         <p className="font-epilogue font-normal text-[16px] text-[#808191] mt-6">
           Already have an account?{" "}
-          <span
-            className="text-[#1dc071] cursor-pointer"
-            onClick={() => router.push("/login")}
-          >
+          <span className="text-[#1dc071] cursor-pointer" onClick={() => router.push("/login")}>
             Login here
           </span>
         </p>
