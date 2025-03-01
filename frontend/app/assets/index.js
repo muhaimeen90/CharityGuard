@@ -1,6 +1,6 @@
 import createCampaign from "./create-campaign.svg";
-import home from "./home.svg";
-import logo from "./logo.svg";
+import { home } from "./home.svg";
+import { logo } from "./logo.svg";
 import logout from "./logout.svg";
 // import payment from './payment.svg';
 import profile from "./profile.svg";

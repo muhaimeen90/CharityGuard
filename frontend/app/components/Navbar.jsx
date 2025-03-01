@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 
 import { useStateContext } from "../context/Campaign";
 import { CustomButton } from "./";
-import { logo, menu, search, logo2 } from "../assets";
+import { menu, search, logo2 } from "../assets";
 import { navlinks } from "../constants";
+import logo from "../assets/logo.svg";
 
 const Navbar = () => {
   const router = useRouter();
