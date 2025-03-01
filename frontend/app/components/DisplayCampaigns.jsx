@@ -8,7 +8,8 @@ const DisplayCampaigns = ({ title, isLoading, campaigns }) => {
   const router = useRouter();
   //console.log(campaigns);
   const handleNavigate = (campaign) => {
-    router.push(`/campaign-details/${campaign.title}`, { state: campaign });
+    console.log(campaign);
+    router.push(`/campaign-details/${campaign.id}`, { state: campaign });
   };
 
   // Improved handling of campaigns:
@@ -44,14 +45,14 @@ const DisplayCampaigns = ({ title, isLoading, campaigns }) => {
             ) => (
               <FundCard
                 key={uuidv4()}
-                title={campaign.campaignName} // Map to the correct property
-                description={campaign.campaignDescription}
-                targetAmount={campaign.goalAmount}
-                raised={campaign.currentAmount}
-                owner={campaign.ownerAddress}
-                recipients={campaign.recipientAddress}
-                deadline={campaign.campaignDeadline}
-                image={campaign.campaignImage}
+                title={campaign.title} // Map to the correct property
+                description={campaign.description}
+                goal={campaign.goal}
+                raised={campaign.raised}
+                owner={campaign.owner}
+                recipients={campaign.recipients}
+                deadline={campaign.deadline}
+                image={campaign.image}
                 handleClick={() => handleNavigate(campaign)}
               />
             )
