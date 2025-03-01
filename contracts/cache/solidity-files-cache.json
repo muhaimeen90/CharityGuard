@@ -1,10 +1,48 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "C:\\Academics\\5th Sem\\CharityGuard\\contracts\\contracts\\Lock.sol": {
-      "lastModificationDate": 1738662363767,
-      "contentHash": "009dc10abe4684f87885b5e53713fbea",
+    "E:\\spl\\backend\\contracts\\contracts\\Lock.sol": {
+      "lastModificationDate": 1740753560124,
+      "contentHash": "070726913fcbbf3afadae3e9fe3950ab",
       "sourceName": "contracts/Lock.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "hardhat/console.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "DonationPlatform"
+      ]
+    },
+    "E:\\spl\\backend\\contracts\\node_modules\\hardhat\\console.sol": {
+      "lastModificationDate": 1738484081941,
+      "contentHash": "681c532e816169606d13a5fe8b475074",
+      "sourceName": "hardhat/console.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
@@ -31,10 +69,10 @@
       },
       "imports": [],
       "versionPragmas": [
-        "^0.8.0"
+        ">=0.4.22 <0.9.0"
       ],
       "artifacts": [
-        "DonationPlatform"
+        "console"
       ]
     }
   }

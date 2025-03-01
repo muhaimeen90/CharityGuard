@@ -1,17 +1,17 @@
-# Node modules
-node_modules/
-
-# Hardhat cache
-cache/
-artifacts/
-
-# Environment variables
+node_modules
 .env
 
-# OS generated files
-.DS_Store
-Thumbs.db
+# Hardhat files
+/cache
+/artifacts
 
-# Debugging
-.vscode/
-.idea/
+# TypeChain files
+/typechain
+/typechain-types
+
+# solidity-coverage files
+/coverage
+/coverage.json
+
+# Hardhat Ignition default folder for deployments against a local node
+ignition/deployments/chain-31337
