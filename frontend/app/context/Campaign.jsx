@@ -10,6 +10,7 @@ export const StateContextProvider = ({ children }) => {
   const [campaigns, setCampaigns] = useState([]);
   const [userCampaigns, setUserCampaigns] = useState([]);
   const [donors, setDonors] = useState([]);
+  const [recipients, setRecipients] = useState([]);
   const [address, setAddress] = useState(null);
   const [contract, setContract] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,6 +58,29 @@ export const StateContextProvider = ({ children }) => {
 
       const donors = await contract.getCampaignDonors(campaignId);
       setDonors(donors);
+    } catch (error) {
+      console.error("Failed to fetch donors:", error);
+      alert("Failed to fetch donors. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchRecipients = async (campaignId) => {
+    setIsLoading(true);
+    try {
+      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545/"); // Local Hardhat network URL
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(
+        //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+        "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+        CampaignFactoryABI.abi,
+        signer
+      );
+      setContract(contract);
+
+      const recipients = await contract.getCampaignRecipients(campaignId);
+      setRecipients(recipients);
     } catch (error) {
       console.error("Failed to fetch donors:", error);
       alert("Failed to fetch donors. Please try again.");
@@ -262,6 +286,8 @@ export const StateContextProvider = ({ children }) => {
         donors,
         fetchDonors,
         userCampaigns,
+        recipients,
+        fetchRecipients,
         //getCampaigns,
       }}
     >

@@ -21,11 +21,17 @@ contract DonationPlatform {
         uint256 amount;
     }
 
+    struct Recipient {
+    address recipientAddress;
+    uint256 amount;
+}
+
     uint256 public campaignCount;
     mapping(uint256 => Campaign) public campaigns;
     mapping(address => uint256[]) public userCampaigns;
     mapping(uint256 => Donor[]) public campaignDonors;
     mapping(address => uint256[]) public userDonations;
+    mapping(uint256 => Recipient[]) public campaignRecipients;
 
     event CampaignCreated(uint256 id, string title, string description, uint256 goal, address owner, uint256 deadline, string image);
     event DonationMade(uint256 campaignId, address donor, uint256 amount);
@@ -106,11 +112,16 @@ contract DonationPlatform {
             remainder--;
         }
 
+        // Store the recipient and their amount in the mapping
+        campaignRecipients[_campaignId].push(Recipient({
+            recipientAddress: campaign.recipients[i],
+            amount: amounts[i]
+        }));
+
         console.log("Sending to recipient:", campaign.recipients[i]);
         console.log("Amount:", amounts[i]);
-
     }
-    campaign.isActive=false;
+
     emit FundsDistributed(_campaignId, campaign.recipients, amounts);
 }
 
@@ -159,6 +170,10 @@ contract DonationPlatform {
     function getCampaignDonors(uint256 _campaignId) public view returns (Donor[] memory) {
         return campaignDonors[_campaignId];
     }
+
+    function getCampaignRecipients(uint256 _campaignId) public view returns (Recipient[] memory) {
+    return campaignRecipients[_campaignId];
+}
 
     // Get campaigns a user has donated to
     function getUserDonations(address _user) public view returns (Campaign[] memory) {

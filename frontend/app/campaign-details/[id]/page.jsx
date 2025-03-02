@@ -133,15 +133,24 @@ import CustomButton from "../../components/CustomButton";
 import FormField from "../../components/FormField";
 import { daysLeft, weiToEth } from "../../utils";
 import Loader from "../../components/Loader"; // Assuming you have a Loader component
-//import { thirdweb } from "../../assets"; // Assuming you have the thirdweb logo
+import { thirdweb } from "../../assets"; // Assuming you have the thirdweb logo
 
 export default function CampaignDetailsPage() {
   const { id } = useParams();
-  const { address, donate, campaigns, donors, fetchDonors } = useStateContext();
+  const {
+    address,
+    donate,
+    campaigns,
+    donors,
+    fetchDonors,
+    recipients,
+    fetchRecipients,
+  } = useStateContext();
   const [campaign, setCampaign] = useState();
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [campaignDonors, setCampaignDonors] = useState([]);
+  const [campaignRecipients, setCampaignRecipients] = useState([]);
 
   const router = useRouter();
 
@@ -162,7 +171,12 @@ export default function CampaignDetailsPage() {
           // Fetch donors for the campaign
           await fetchDonors(campaignId);
 
-          setCampaignDonors(donors); // Update state with fetched donors
+          setCampaignDonors(donors);
+
+          if (selectedCampaign.isActive === false) {
+            await fetchRecipients(campaignId);
+            setCampaignRecipients(recipients);
+          }
         } else {
           console.error("Campaign not found");
         }
@@ -198,6 +212,7 @@ export default function CampaignDetailsPage() {
 
   const remainingDays = daysLeft(campaign.deadline);
   const isCampaignOwner = address === campaign.owner;
+  const isActive = true == campaign.isActive;
 
   return (
     <div>
@@ -303,11 +318,40 @@ export default function CampaignDetailsPage() {
               )}
             </div>
           </div>
+
+          {/* Recipients Section */}
+          <div>
+            <h4 className="font-epilogue font-semibold text-[18px] text-white uppercase">
+              Recipients
+            </h4>
+
+            <div className="mt-[20px] flex flex-col gap-4">
+              {campaignRecipients.length > 0 ? (
+                campaignRecipients.map((recipient, index) => (
+                  <div
+                    key={`${recipient}-${index}`}
+                    className="flex justify-between items-center gap-4"
+                  >
+                    <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
+                      {index + 1}. {recipient.recipientAddress}
+                    </p>
+                    <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] break-all">
+                      {weiToEth(recipient.amount)} ETH
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">
+                  No recipients specified.
+                </p>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Right Section */}
         <div className="flex-1">
-          {!isCampaignOwner && (
+          {!isCampaignOwner && isActive && (
             <>
               <h4 className="font-epilogue font-semibold text-[18px] text-white uppercase">
                 Fund
