@@ -1,11 +1,12 @@
 "use client";
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
 
-import { logo } from "../assets"; // Removed `sun` from the import
+import { logo } from "../assets";
 import { navlinks } from "../constants";
-import { useStateContext } from "../context/Campaign"; // Adjust the import path as necessary
+import { useStateContext } from "../context/Campaign";
 
 const Icon = ({ styles, name, imgUrl, isActive, disabled, handleClick }) => (
   <div
@@ -30,9 +31,15 @@ const Icon = ({ styles, name, imgUrl, isActive, disabled, handleClick }) => (
 
 const Sidebar = () => {
   const router = useRouter();
-  const { address } = useStateContext(); // Assuming address is used to check if the user is logged in
+  const { data: session } = useSession();
+  const { address } = useStateContext();
   const [isActive, setIsActive] = useState("home");
-  //const add = 1;
+
+  const handleLogout = async () => {
+    await signOut({ redirect: false });
+    router.push("/login");
+  };
+
   return (
     <div className="flex justify-between items-center flex-col sticky top-5 h-[93vh]">
       <Link href={address ? "/home" : "/"}>
@@ -49,12 +56,14 @@ const Sidebar = () => {
               handleClick={() => {
                 if (!link.disabled) {
                   setIsActive(link.name);
-                  // Route to 'home' if it's the first element, otherwise use the link's route
-                  if (index === 0) {
+                  
+                  if (link.name === "logout" && session) {
+                    handleLogout();
+                  } else if (index === 0) {
                     if (address) {
                       router.push("/home");
                     } else {
-                      router.push("/page");
+                      router.push("/");
                     }
                   } else {
                     router.push(link.link);

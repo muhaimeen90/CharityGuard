@@ -3,33 +3,24 @@ import {
   home,
   logout,
   notifications,
-  //payment,
   profile,
-  //withdraw,
 } from "../assets/index";
 
 export const navlinks = [
   {
     name: "home",
     imgUrl: home,
-    link: "/",
+    link: "/home",
   },
   {
     name: "campaign",
     imgUrl: createCampaign,
     link: "/create-campaign",
   },
-  // {
-  //   name: "payment",
-  //   imgUrl: payment,
-  //   link: "/",
-  //   disabled: true,
-  // },
   {
     name: "notifications",
     imgUrl: notifications,
-    link: "notifications",
-    disabled: true,
+    link: "/notifications",
   },
   {
     name: "profile",
@@ -39,7 +30,7 @@ export const navlinks = [
   {
     name: "logout",
     imgUrl: logout,
-    link: "/",
-    disabled: true,
+    link: "#", // Using # as we'll handle this with custom logic
+    disabled: false, // Changed to false to enable logout
   },
 ];
