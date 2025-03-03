@@ -1,44 +1,53 @@
 "use client";
-import Link from "next/link";
+
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import CustomButton from "../components/CustomButton";
+import Link from "next/link";
 
 export default function LoginPage() {
-  // Add state to hold email/password
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [redirect, setRedirect] = useState(false);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
       });
-      if (!res.ok) throw new Error("Login failed");
-      const data = await res.json();
-      // For example, store token in localStorage:
-      localStorage.setItem("token", data.token);
-      console.log("Successfully logged in!", data);
-      setRedirect(true);
+
+      if (result.error) {
+        setError("Invalid email or password");
+      } else {
+        router.push("/home");
+      }
     } catch (err) {
-      console.error(err);
-      alert("Login error");
+      console.error("Login error:", err);
+      setError("An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  if (redirect) {
-    window.location.href = "/home";
-  }
-
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen p-4 rounded-[10px]">
+    <div className="bg-[#1c1c24] flex flex-col justify-center items-center min-h-screen p-4 rounded-[10px]">
       <div className="flex flex-col items-center text-center">
         <h1 className="font-epilogue font-bold sm:text-[50px] text-[40px] leading-[60px] text-white">
           Login
         </h1>
+        <p className="font-epilogue font-normal text-[18px] text-[#808191] mt-4 max-w-[600px]">
+          Sign in to your CharityGuard account
+        </p>
+
         <form onSubmit={handleSubmit} className="w-full max-w-[400px] mt-8">
           <div className="flex flex-col gap-4">
             <input
@@ -57,13 +66,20 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            
+            {error && (
+              <p className="font-epilogue font-normal text-[16px] text-red-500">{error}</p>
+            )}
+            
             <CustomButton
               btnType="submit"
-              title="Login"
+              title={isLoading ? "Signing in..." : "Login"}
               styles="bg-[#1dc071] w-full"
+              disabled={isLoading}
             />
           </div>
         </form>
+        
         <p className="font-epilogue font-normal text-[16px] text-[#808191] mt-6">
           Don't have an account?{" "}
           <Link href="/register" className="text-[#1dc071] cursor-pointer">
