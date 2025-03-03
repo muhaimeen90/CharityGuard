@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@thirdweb-dev/sdk": "^4.0.41",
+    "date-fns": "^4.1.0",
     "ethers": "^6.13.5",
     "i": "^0.3.7",
     "moment": "^2.30.1",

@@ -1,37 +1,29 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import DisplayCampaigns from "../components/DisplayCampaigns";
 import { useStateContext } from "../context/Campaign";
 import ProtectedRoute from "../components/ProtectedRoute";
 
 export default function HomePage() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [campaigns, setCampaigns] = useState([]);
-  const { address, fetchCampaign } = useStateContext();
-  const { status } = useSession();
+  const [isLoading, setIsLoading] = useState(true); // Start with loading true
+  const { campaigns, fetchCampaigns } = useStateContext();
 
-  const fetchAllCampaigns = async () => {
-    setIsLoading(true);
-    try {
-      if (fetchCampaign) {
-        const data = await fetchCampaign;
-        setCampaigns(Array.isArray(data) ? data : []);
-      }
-    } catch (error) {
-      console.error("Failed to fetch campaigns:", error);
-      setCampaigns([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // Fetch campaigns only once on component mount
   useEffect(() => {
-    if (status === "authenticated") {
-      fetchAllCampaigns();
-    }
-  }, [address, status]);
+    const loadCampaigns = async () => {
+      setIsLoading(true);
+      try {
+        await fetchCampaigns();
+      } catch (error) {
+        console.error("Failed to fetch campaigns:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCampaigns();
+  }, []); // Only run once on mount, removing fetchCampaigns from dependencies
 
   return (
     <ProtectedRoute>

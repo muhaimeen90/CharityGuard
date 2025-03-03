@@ -1,8 +1,9 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { ethers, JsonRpcProvider, JsonRpcSigner } from "ethers";
+import { ethers } from "ethers";
 import CampaignFactoryABI from "../abis/CampaignFactory.json";
+import { useSession } from "next-auth/react";
 
 const StateContext = createContext();
 
@@ -14,8 +15,27 @@ export const StateContextProvider = ({ children }) => {
   const [address, setAddress] = useState(null);
   const [contract, setContract] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { data: session } = useSession();
 
-  // Connect to MetaMask
+  // Function to create a notification in the backend
+  const createNotification = async (type, message, data = {}) => {
+    if (!session?.user?.accessToken) return;
+    
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/notifications`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.user.accessToken}`
+        },
+        body: JSON.stringify({ type, message, data })
+      });
+    } catch (error) {
+      console.error("Failed to create notification:", error);
+    }
+  };
+
+  // Connect to MetaMask - Fixed implementation
   const connect = async () => {
     if (!window.ethereum) {
       alert("Please install MetaMask to use this feature.");
@@ -23,15 +43,28 @@ export const StateContextProvider = ({ children }) => {
       return;
     }
 
-    if (isLoading) return; // Prevent multiple connection attempts
-
     setIsLoading(true);
     try {
+      // Request account access
       const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
+        method: 'eth_requestAccounts'
       });
+      
       if (accounts.length > 0) {
         setAddress(accounts[0]);
+        
+        // Set up contract instance
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        
+        const contractInstance = new ethers.Contract(
+          "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          CampaignFactoryABI.abi,
+          signer
+        );
+        
+        setContract(contractInstance);
+        fetchCampaigns(); // Fetch campaigns after successful connection
       } else {
         alert("No accounts found. Please unlock MetaMask and try again.");
       }
@@ -46,13 +79,12 @@ export const StateContextProvider = ({ children }) => {
   const fetchDonors = async (campaignId) => {
     setIsLoading(true);
     try {
-      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545/"); // Local Hardhat network URL
-      const signer = await provider.getSigner();
+      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545/");
+      const signers = await provider.listAccounts();
       const contract = new ethers.Contract(
-        //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
         "0x5fbdb2315678afecb367f032d93f642f64180aa3",
         CampaignFactoryABI.abi,
-        signer
+        signers[4]
       );
       setContract(contract);
 
@@ -60,7 +92,6 @@ export const StateContextProvider = ({ children }) => {
       setDonors(donors);
     } catch (error) {
       console.error("Failed to fetch donors:", error);
-      alert("Failed to fetch donors. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -69,50 +100,40 @@ export const StateContextProvider = ({ children }) => {
   const fetchRecipients = async (campaignId) => {
     setIsLoading(true);
     try {
-      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545/"); // Local Hardhat network URL
-      const signer = await provider.getSigner();
-      const contract = new ethers.Contract(
-        //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-        "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-        CampaignFactoryABI.abi,
-        signer
-      );
-      setContract(contract);
-
-      const recipients = await contract.getCampaignRecipients(campaignId);
-      setRecipients(recipients);
-    } catch (error) {
-      console.error("Failed to fetch donors:", error);
-      alert("Failed to fetch donors. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Fetch campaigns from the contract
-  const fetchCampaigns = async () => {
-    if (!address) return; // Only fetch campaigns if the user is connected
-
-    setIsLoading(true);
-    try {
-      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545/"); // Local Hardhat network URL
+      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545/");
       const signers = await provider.listAccounts();
-      //const signer = await provider.getSigner(signers[4]);
       const contract = new ethers.Contract(
-        //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
         "0x5fbdb2315678afecb367f032d93f642f64180aa3",
         CampaignFactoryABI.abi,
         signers[4]
       );
       setContract(contract);
 
-      const campaigns = await contract.getAllCampaigns();
+      const recipients = await contract.getCampaignRecipients(campaignId);
+      setRecipients(recipients);
+    } catch (error) {
+      console.error("Failed to fetch recipients:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  // Fetch campaigns from the contract - Fix to load regardless of wallet connection
+  const fetchCampaigns = async () => {
+    setIsLoading(true);
+    try {
+      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545/");
+      const signers = await provider.listAccounts();
+      const contract = new ethers.Contract(
+        "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+        CampaignFactoryABI.abi,
+        signers[4]
+      );
+      
+      const campaigns = await contract.getAllCampaigns();
       setCampaigns(campaigns);
-      //console.log(campaigns);
     } catch (error) {
       console.error("Failed to fetch campaigns:", error);
-      alert("Failed to fetch campaigns. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -126,88 +147,99 @@ export const StateContextProvider = ({ children }) => {
       if (accounts.length > 0) {
         setAddress(accounts[0]);
       } else {
-        setAddress(null); // User disconnected their wallet
+        setAddress(null);
       }
     };
 
     window.ethereum.on("accountsChanged", handleAccountsChanged);
+    
+    // Check if already connected
+    const checkConnection = async () => {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        if (accounts.length > 0) {
+          setAddress(accounts[0]);
+          
+          const provider = new ethers.BrowserProvider(window.ethereum);
+          const signer = await provider.getSigner();
+          
+          const contractInstance = new ethers.Contract(
+            "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+            CampaignFactoryABI.abi,
+            signer
+          );
+          
+          setContract(contractInstance);
+        }
+      } catch (error) {
+        console.error("Error checking connection:", error);
+      }
+    };
+    
+    checkConnection();
 
     return () => {
       window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
     };
   }, []);
 
-  // Automatically fetch campaigns when the address changes
+  // Automatically fetch campaigns on component mount
   useEffect(() => {
-    if (address) {
-      fetchCampaigns();
-    }
-  }, [address]);
+    fetchCampaigns();
+  }, []);
 
-  const getUserCampaigns = async () => {
-    if (!address) return; // Only fetch campaigns if the user is connected
+// Update the getUserCampaigns function:
 
-    setIsLoading(true);
-    try {
-      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545/");
-      const signer = await provider.getSigner();
-      const contract = new ethers.Contract(
-        "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-        CampaignFactoryABI.abi,
-        signer
-      );
-      setContract(contract);
+const getUserCampaigns = async () => {
+  if (!address) return;
 
-      const campaigns = await contract.getUserCampaigns(signer.address);
-      setUserCampaigns(campaigns);
-      //console.log("User Campaigns:", campaigns);
-    } catch (error) {
-      console.error("Failed to fetch campaigns:", error);
-      alert("Failed to fetch campaigns. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // const getCampaigns = async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     const allCampaigns = await fetchAllCampaigns();
-  //     setCampaigns(allCampaigns);
-  //   } catch (error) {
-  //     console.error("Failed to fetch campaigns:", error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
+  setIsLoading(true);
+  try {
+    // Use JsonRpcProvider for consistent provider access
+    const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545/");
+    const contractWithProvider = new ethers.Contract(
+      "0x5fbdb2315678afecb367f032d93f642f64180aa3", // Your contract address
+      CampaignFactoryABI.abi,
+      provider
+    );
+    
+    // Use the connected wallet address
+    const userCampaignsList = await contractWithProvider.getUserCampaigns(address);
+    console.log("User campaigns fetched:", userCampaignsList);
+    
+    setUserCampaigns(userCampaignsList || []);
+    
+    return userCampaignsList;
+  } catch (error) {
+    console.error("Failed to fetch user campaigns:", error);
+    setUserCampaigns([]); // Set to empty array on error
+    return [];
+  } finally {
+    setIsLoading(false);
+  }
+};
   const createCampaign = async (form) => {
     try {
       setIsLoading(true);
-      // Connect to Ethereum provider
-      //console.log("ABI:", CampaignFactoryABI);
-
+      
       const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545/");
       const signers = await provider.listAccounts();
-      //const signer = await provider.getSigner();
       console.log("Signer:", signers);
-      // Create contract instance
-
+      
       const contract = new ethers.Contract(
-        //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
         "0x5fbdb2315678afecb367f032d93f642f64180aa3",
         CampaignFactoryABI.abi,
         signers[4]
       );
-      // Convert form data for blockchain
+      
       const deadline = new Date(form.deadline).getTime();
       const goal = form.target;
       const recipients = form.recipients;
-
+      
       // Call smart contract function
       const transaction = await contract.createCampaign(
         form.title,
         form.description,
-
         goal,
         recipients,
         deadline,
@@ -218,6 +250,18 @@ export const StateContextProvider = ({ children }) => {
       await transaction.wait();
 
       console.log("Campaign created successfully:", transaction);
+      
+      // Add notification for campaign creation
+      if (session?.user) {
+        await createNotification(
+          'CAMPAIGN_CREATED',
+          `Your campaign "${form.title}" has been created successfully!`,
+          { campaignTitle: form.title, campaignId: transaction.hash }
+        );
+      }
+      
+      // Refresh campaigns after creating a new one
+      await fetchCampaigns();
     } catch (error) {
       console.error("Contract error:", error);
       throw error;
@@ -239,17 +283,20 @@ export const StateContextProvider = ({ children }) => {
 
     setIsLoading(true);
     try {
-      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545/"); // Local Hardhat network URL
+      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545/");
       const signers = await provider.listAccounts();
-      const signer = await provider.getSigner();
       const contract = new ethers.Contract(
-        "0x5fbdb2315678afecb367f032d93f642f64180aa3", // Replace with your contract address
+        "0x5fbdb2315678afecb367f032d93f642f64180aa3",
         CampaignFactoryABI.abi,
         signers[4]
       );
 
       // Convert donation amount to Wei
       const donationAmountWei = ethers.parseEther(donationAmount.toString());
+
+      // Find campaign details for notification
+      const campaign = campaigns.find(c => c.id == campaignId);
+      const campaignTitle = campaign ? campaign.title : "Campaign #" + campaignId;
 
       // Call the donate function in the smart contract
       const transaction = await contract.donate(campaignId, {
@@ -260,6 +307,16 @@ export const StateContextProvider = ({ children }) => {
       await transaction.wait();
 
       console.log("Donation successful:", transaction);
+      
+      // Create notification for donation
+      if (session?.user) {
+        await createNotification(
+          'DONATION',
+          `You donated ${donationAmount} ETH to campaign "${campaignTitle}"`,
+          { campaignId, campaignTitle, amount: donationAmount }
+        );
+      }
+
       alert("Donation successful!");
 
       // Refresh the campaigns list after donation
@@ -281,14 +338,13 @@ export const StateContextProvider = ({ children }) => {
         fetchCampaigns,
         isLoading,
         getUserCampaigns,
+        userCampaigns,
         createCampaign,
         donate,
         donors,
         fetchDonors,
-        userCampaigns,
         recipients,
         fetchRecipients,
-        //getCampaigns,
       }}
     >
       {children}

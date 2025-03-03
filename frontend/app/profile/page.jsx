@@ -7,29 +7,18 @@ import { useStateContext } from "../context/Campaign";
 import DisplayCampaigns from "../components/DisplayCampaigns";
 import ProtectedRoute from "../components/ProtectedRoute";
 import CustomButton from "../components/CustomButton";
+import Loader from "../components/Loader";
 
 const ProfilePage = () => {
   const { data: session } = useSession();
-  const { address, getUserCampaigns, userCampaigns } = useStateContext();
-  const [isLoading, setIsLoading] = useState(false);
+  const { address, getUserCampaigns, userCampaigns, isLoading: contextLoading } = useStateContext();
+  const [isLoading, setIsLoading] = useState(true);
   const [userInfo, setUserInfo] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
-    const fetchUserCampaigns = async () => {
-      setIsLoading(true);
-      try {
-        await getUserCampaigns();
-      } catch (error) {
-        console.error("Failed to fetch user campaigns:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     const fetchUserInfo = async () => {
       if (session?.user) {
-        // In a real app, you might want to fetch more user details from your backend
         setUserInfo({
           id: session.user.id,
           email: session.user.email,
@@ -37,10 +26,28 @@ const ProfilePage = () => {
         });
       }
     };
-
-    if (address) fetchUserCampaigns();
+    
     fetchUserInfo();
-  }, [address, session]);
+  }, [session]);
+
+  useEffect(() => {
+    const loadUserCampaigns = async () => {
+      if (address) {
+        setIsLoading(true);
+        try {
+          await getUserCampaigns();
+        } catch (error) {
+          console.error("Failed to fetch user campaigns:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadUserCampaigns();
+  }, [address]); // Only depend on address to prevent infinite loops
+
+  console.log("User campaigns:", userCampaigns);
 
   return (
     <ProtectedRoute>
@@ -70,12 +77,6 @@ const ProfilePage = () => {
               </p>
 
               <div className="mt-4 flex flex-wrap gap-3">
-                <CustomButton 
-                  btnType="button"
-                  title="Edit Profile"
-                  styles="bg-[#1dc071] hover:bg-[#14a85d]"
-                  handleClick={() => alert("Edit profile functionality coming soon!")}
-                />
                 <CustomButton 
                   btnType="button"
                   title="Create Campaign"
@@ -108,11 +109,13 @@ const ProfilePage = () => {
         </div>
 
         {/* User Campaigns */}
-        <DisplayCampaigns
-          title="Your Campaigns"
-          isLoading={isLoading}
-          campaigns={userCampaigns}
-        />
+        {isLoading || contextLoading ? <Loader /> : (
+          <DisplayCampaigns
+            title="Your Campaigns"
+            isLoading={false}
+            campaigns={userCampaigns}
+          />
+        )}
       </div>
     </ProtectedRoute>
   );

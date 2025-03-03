@@ -2,11 +2,18 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 import { logo } from "../assets";
-import { navlinks } from "../constants";
 import { useStateContext } from "../context/Campaign";
+
+// Import only the navigation links you want to keep
+import {
+  createCampaign,
+  home,
+  profile,
+  notifications,
+} from "../assets/index";
 
 const Icon = ({ styles, name, imgUrl, isActive, disabled, handleClick }) => (
   <div
@@ -35,10 +42,30 @@ const Sidebar = () => {
   const { address } = useStateContext();
   const [isActive, setIsActive] = useState("home");
 
-  const handleLogout = async () => {
-    await signOut({ redirect: false });
-    router.push("/login");
-  };
+  // Define navlinks directly here instead of importing from constants
+  // This way we exclude the logout option
+  const sidebarLinks = [
+    {
+      name: "home",
+      imgUrl: home,
+      link: "/home",
+    },
+    {
+      name: "campaign",
+      imgUrl: createCampaign,
+      link: "/create-campaign",
+    },
+    {
+      name: "notifications",
+      imgUrl: notifications,
+      link: "/notifications",
+    },
+    {
+      name: "profile",
+      imgUrl: profile,
+      link: "/profile",
+    }
+  ];
 
   return (
     <div className="flex justify-between items-center flex-col sticky top-5 h-[93vh]">
@@ -48,7 +75,7 @@ const Sidebar = () => {
 
       <div className="flex-1 flex flex-col justify-between items-center bg-[#1c1c24] rounded-[20px] w-[76px] py-4 mt-12">
         <div className="flex flex-col justify-center items-center gap-3">
-          {navlinks.map((link, index) => (
+          {sidebarLinks.map((link) => (
             <Icon
               key={link.name}
               {...link}
@@ -56,18 +83,7 @@ const Sidebar = () => {
               handleClick={() => {
                 if (!link.disabled) {
                   setIsActive(link.name);
-                  
-                  if (link.name === "logout" && session) {
-                    handleLogout();
-                  } else if (index === 0) {
-                    if (address) {
-                      router.push("/home");
-                    } else {
-                      router.push("/");
-                    }
-                  } else {
-                    router.push(link.link);
-                  }
+                  router.push(link.link);
                 }
               }}
             />
