@@ -166,6 +166,7 @@ export default function CampaignDetailsPage() {
         );
 
         if (selectedCampaign) {
+          console.log("Selected Campaign:", selectedCampaign);
           setCampaign(selectedCampaign);
 
           // Fetch donors for the campaign
@@ -211,7 +212,13 @@ export default function CampaignDetailsPage() {
   if (!campaign) return <Loader />; // Show loader while loading
 
   const remainingDays = daysLeft(campaign.deadline);
-  const isCampaignOwner = address === campaign.owner;
+  const isCampaignOwner =
+    address.toLowerCase() === campaign.owner.toLowerCase();
+
+  console.log("owner", campaign.owner);
+  console.log("address", address);
+  console.log("True naki false", isCampaignOwner);
+
   const isActive = true == campaign.isActive;
 
   return (

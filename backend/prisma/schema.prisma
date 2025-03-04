@@ -20,7 +20,7 @@ model User {
   id                 String         @id @default(auto()) @map("_id") @db.ObjectId
   email              String         @unique
   password           String
-  smartWalletAddress String?        
+  smartWalletAddress String?        @unique
   role               UserRole
   notifications      Notification[]
   createdAt          DateTime       @default(now())
