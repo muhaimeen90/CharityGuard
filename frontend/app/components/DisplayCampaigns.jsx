@@ -2,7 +2,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import FundCard from "./FundCard";
-import { loader } from "../assets";
+import loader from "../assets/loader.svg";
 import { weiToEth } from "../utils";
 
 const DisplayCampaigns = ({ title, isLoading, campaigns = [] }) => {

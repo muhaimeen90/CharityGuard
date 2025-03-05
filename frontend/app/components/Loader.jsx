@@ -1,6 +1,6 @@
 import React from "react";
 
-import loader from "../assets";
+import loader from "../assets/loader.svg";
 import Image from "next/image";
 
 const Loader = () => {

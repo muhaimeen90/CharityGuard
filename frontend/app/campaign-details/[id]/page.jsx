@@ -133,7 +133,7 @@ import CustomButton from "../../components/CustomButton";
 import FormField from "../../components/FormField";
 import { daysLeft, weiToEth } from "../../utils";
 import Loader from "../../components/Loader"; // Assuming you have a Loader component
-import { thirdweb } from "../../assets"; // Assuming you have the thirdweb logo
+import { thirdweb2 } from "../../assets"; // Assuming you have the thirdweb logo
 //import
 
 export default function CampaignDetailsPage() {
@@ -269,7 +269,7 @@ export default function CampaignDetailsPage() {
             <div className="mt-[20px] flex flex-row items-center flex-wrap gap-[14px]">
               <div className="w-[52px] h-[52px] flex items-center justify-center rounded-full bg-[#2c2f32] cursor-pointer">
                 <img
-                  src={thirdweb}
+                  src={thirdweb2}
                   alt="user"
                   className="w-[60%] h-[60%] object-contain"
                 />
