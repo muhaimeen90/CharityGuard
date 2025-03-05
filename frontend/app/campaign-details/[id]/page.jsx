@@ -134,6 +134,7 @@ import FormField from "../../components/FormField";
 import { daysLeft, weiToEth } from "../../utils";
 import Loader from "../../components/Loader"; // Assuming you have a Loader component
 import { thirdweb } from "../../assets"; // Assuming you have the thirdweb logo
+//import
 
 export default function CampaignDetailsPage() {
   const { id } = useParams();
@@ -272,6 +273,8 @@ export default function CampaignDetailsPage() {
                   alt="user"
                   className="w-[60%] h-[60%] object-contain"
                 />
+                {/*                 
+                <Image src={sea} alt="search" height={15} width={15} /> */}
               </div>
               <div>
                 <h4 className="font-epilogue font-semibold text-[14px] text-white break-all">

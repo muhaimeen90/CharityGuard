@@ -8,6 +8,7 @@ import { useStateContext } from "../context/Campaign";
 import { navlinks } from "../constants";
 import { search, menu } from "../assets";
 import NotificationBell from "./NotificationBell";
+import Image from "next/image";
 
 const Navbar = () => {
   const { data: session, status } = useSession();
@@ -32,11 +33,12 @@ const Navbar = () => {
         />
 
         <div className="w-[72px] h-full rounded-[20px] bg-[#4acd8d] flex justify-center items-center cursor-pointer">
-          <img
-            src={search}
+          {/* <img
+            src="../assets/logo2.png"
             alt="search"
             className="w-[15px] h-[15px] object-contain"
-          />
+          /> */}
+          <Image src={search} alt="search" height={15} width={15} />
         </div>
       </div>
 

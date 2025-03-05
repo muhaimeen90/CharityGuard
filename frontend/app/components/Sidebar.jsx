@@ -6,14 +6,10 @@ import { useSession } from "next-auth/react";
 
 import { logo } from "../assets";
 import { useStateContext } from "../context/Campaign";
+import Image from "next/image";
 
 // Import only the navigation links you want to keep
-import {
-  createCampaign,
-  home,
-  profile,
-  notifications,
-} from "../assets/index";
+import { createCampaign, home, profile, notifications } from "../assets/index";
 
 const Icon = ({ styles, name, imgUrl, isActive, disabled, handleClick }) => (
   <div
@@ -25,9 +21,10 @@ const Icon = ({ styles, name, imgUrl, isActive, disabled, handleClick }) => (
     onClick={handleClick}
   >
     {!isActive ? (
-      <img src={imgUrl} alt="fund_logo" className="w-1/2 h-1/2" />
+      // <img src={imgUrl} alt="fund_logo" className="w-1/2 h-1/2" />
+      <Image src={imgUrl} alt="fund_logo" height={95} width={95} />
     ) : (
-      <img
+      <Image
         src={imgUrl}
         alt="fund_logo"
         className={`w-1/2 h-1/2 ${isActive !== name && "grayscale"}`}
@@ -64,7 +61,7 @@ const Sidebar = () => {
       name: "profile",
       imgUrl: profile,
       link: "/profile",
-    }
+    },
   ];
 
   return (

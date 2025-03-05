@@ -7,17 +7,20 @@ import { weiToEth } from "../utils";
 
 const DisplayCampaigns = ({ title, isLoading, campaigns = [] }) => {
   const router = useRouter();
-  
+
   const handleNavigate = (campaign) => {
     router.push(`/campaign-details/${campaign.id}`);
   };
 
   // Ensure campaigns is an array even if undefined is passed
   const campaignsToDisplay = Array.isArray(campaigns) ? campaigns : [];
-  
+
   const processCampaign = (campaign, index) => {
     // Check if campaign is array-like (from smart contract)
-    if (Array.isArray(campaign) || (campaign && typeof campaign === 'object' && campaign[0] !== undefined)) {
+    if (
+      Array.isArray(campaign) ||
+      (campaign && typeof campaign === "object" && campaign[0] !== undefined)
+    ) {
       return {
         id: campaign[0]?.toString() || `${index}`,
         title: campaign[1] || "Untitled Campaign",
@@ -31,7 +34,7 @@ const DisplayCampaigns = ({ title, isLoading, campaigns = [] }) => {
         image: campaign[9] || "https://via.placeholder.com/150",
       };
     }
-    
+
     // If campaign is object-like (already processed)
     return {
       id: campaign.id?.toString() || `${index}`,
@@ -42,7 +45,9 @@ const DisplayCampaigns = ({ title, isLoading, campaigns = [] }) => {
       owner: campaign.owner || "Unknown",
       isActive: campaign.isActive !== undefined ? campaign.isActive : true,
       recipients: campaign.recipients || [],
-      deadline: campaign.deadline ? Number(campaign.deadline) : Date.now() + 86400000,
+      deadline: campaign.deadline
+        ? Number(campaign.deadline)
+        : Date.now() + 86400000,
       image: campaign.image || "https://via.placeholder.com/150",
     };
   };
@@ -72,7 +77,7 @@ const DisplayCampaigns = ({ title, isLoading, campaigns = [] }) => {
           campaignsToDisplay.length > 0 &&
           campaignsToDisplay.map((campaign, index) => {
             const campaignData = processCampaign(campaign, index);
-            
+
             return (
               <FundCard
                 key={uuidv4()}

@@ -1,6 +1,6 @@
 import createCampaign from "./create-campaign.svg";
-import { home } from "./home.svg";
-import { logo } from "./logo.svg";
+import home from "./home.svg";
+import logo from "./logo.svg";
 import logout from "./logout.svg";
 // import payment from './payment.svg';
 import profile from "./profile.svg";
@@ -12,7 +12,7 @@ import menu from "./menu.svg";
 import money from "./money.svg";
 import loader from "./loader.svg";
 import logo2 from "./logo2.png";
-
+import thirdweb2 from "./thirdweb2.svg";
 export {
   tagType,
   createCampaign,
@@ -27,4 +27,5 @@ export {
   money,
   loader,
   logo2,
+  thirdweb2,
 };

@@ -2,6 +2,7 @@
 import React from "react";
 import { tagType } from "../assets";
 import { daysLeft } from "../utils";
+import Image from "next/image";
 
 const FundCard = ({
   title,
@@ -33,11 +34,12 @@ const FundCard = ({
 
       <div className="flex flex-col p-4">
         <div className="flex flex-row items-center mb-[18px]">
-          <img
+          {/* <img
             src={tagType}
             alt="tag"
             className="w-[17px] h-[17px] object-contain"
-          />
+          /> */}
+          <Image src={tagType} alt="tag" height={17} width={17} />
           <p className="ml-[12px] mt-[2px] font-epilogue font-medium text-[12px] text-[#808191]">
             Category
           </p>
@@ -78,7 +80,10 @@ const FundCard = ({
             </p>
           </div>
           <p className="flex-1 font-epilogue font-normal text-[12px] text-[#808191] truncate">
-            by <span className="text-[#b2b3bd]">{owner?.slice(0, 6)}...{owner?.slice(-4)}</span>
+            by{" "}
+            <span className="text-[#b2b3bd]">
+              {owner?.slice(0, 6)}...{owner?.slice(-4)}
+            </span>
           </p>
         </div>
       </div>

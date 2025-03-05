@@ -2,19 +2,19 @@
 
 import { useRouter } from "next/navigation";
 import CustomButton from "./components/CustomButton";
-import { useStateContext } from "./context/Campaign"; // Adjust the import path as necessary
+//import { useStateContext } from "./context/Campaign"; // Adjust the import path as necessary
 
 export default function Home() {
   const router = useRouter();
-  const { address } = useStateContext(); // Assuming address is used to check if the user is logged in
+  //const { address } = useStateContext(); // Assuming address is used to check if the user is logged in
 
-  const handleExploreClick = () => {
-    if (address) {
-      router.push("/home");
-    } else {
-      router.push("/unAuthHome");
-    }
-  };
+  // const handleExploreClick = () => {
+  //   if (address) {
+  //     router.push("/home");
+  //   } else {
+  //     router.push("/unAuthHome");
+  //   }
+  // };
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen p-4 rounded-[10px] bg-[#13131a]">
@@ -40,12 +40,12 @@ export default function Home() {
             styles="bg-[#8c6dfd] hover:bg-[#7b5de8] transition-all"
             handleClick={() => router.push("/register")}
           />
-          <CustomButton
+          {/* <CustomButton
             btnType="button"
             title="Explore Campaigns"
             styles="bg-[#4e4e57] hover:bg-[#3a3a43] transition-all"
             handleClick={handleExploreClick}
-          />
+          /> */}
         </div>
       </div>
 
