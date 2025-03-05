@@ -66,29 +66,27 @@ contract DonationPlatform {
     }
 
     function donate(uint256 _campaignId) public payable {
-        require(_campaignId > 0 && _campaignId <= campaignCount, "Invalid campaign ID");
-        Campaign storage campaign = campaigns[_campaignId];
-        require(campaign.isActive, "Campaign is not active");
+    require(_campaignId > 0 && _campaignId <= campaignCount, "Invalid campaign ID");
+    Campaign storage campaign = campaigns[_campaignId];
+    require(campaign.isActive, "Campaign is not active");
 
-        campaign.raised += msg.value;
-        (bool sent, ) = campaign.owner.call{value: msg.value}("");
-        require(sent, "Failed to send Ether");
+    campaign.raised += msg.value;
 
-        campaignDonors[_campaignId].push(Donor({
-            donorAddress: msg.sender,
-            amount: msg.value
-        }));
+    campaignDonors[_campaignId].push(Donor({
+        donorAddress: msg.sender,
+        amount: msg.value
+    }));
 
-        userDonations[msg.sender].push(_campaignId);
+    userDonations[msg.sender].push(_campaignId);
 
-        emit DonationMade(_campaignId, msg.sender, msg.value);
+    emit DonationMade(_campaignId, msg.sender, msg.value);
 
-        if (campaign.raised >= campaign.goal || block.timestamp >= campaign.deadline) {
-            distributeFunds(_campaignId);
-        }
+    if (campaign.raised >= campaign.goal || block.timestamp >= campaign.deadline) {
+        distributeFunds(_campaignId);
     }
+}
 
-    function distributeFunds(uint256 _campaignId) internal {
+function distributeFunds(uint256 _campaignId) internal {
     Campaign storage campaign = campaigns[_campaignId];
     require(campaign.isActive, "Campaign is not active");
     require(campaign.raised >= campaign.goal || block.timestamp >= campaign.deadline, "Goal not reached or deadline not reached");
@@ -120,6 +118,10 @@ contract DonationPlatform {
 
         console.log("Sending to recipient:", campaign.recipients[i]);
         console.log("Amount:", amounts[i]);
+
+        // Send funds to the recipient
+        (bool sent, ) = payable(campaign.recipients[i]).call{value: amounts[i]}("");
+        require(sent, "Failed to send Ether to recipient");
     }
 
     emit FundsDistributed(_campaignId, campaign.recipients, amounts);

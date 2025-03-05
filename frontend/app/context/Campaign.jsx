@@ -464,7 +464,7 @@ export const StateContextProvider = ({ children }) => {
         const signer = await provider.getSigner();
 
         const contractInstance = new ethers.Contract(
-          "0xF4bEf358F5Ca57C8F570Bef51BE3C238A933eAdb",
+          "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
           CampaignFactoryABI.abi,
           signer
         );
@@ -496,7 +496,7 @@ export const StateContextProvider = ({ children }) => {
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
         //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-        "0xF4bEf358F5Ca57C8F570Bef51BE3C238A933eAdb",
+        "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
         CampaignFactoryABI.abi,
         signer
       );
@@ -525,7 +525,7 @@ export const StateContextProvider = ({ children }) => {
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
         //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-        "0xF4bEf358F5Ca57C8F570Bef51BE3C238A933eAdb",
+        "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
         CampaignFactoryABI.abi,
         signer
       );
@@ -554,7 +554,7 @@ export const StateContextProvider = ({ children }) => {
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
         //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-        "0xF4bEf358F5Ca57C8F570Bef51BE3C238A933eAdb",
+        "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
         CampaignFactoryABI.abi,
         signer
       );
@@ -596,7 +596,7 @@ export const StateContextProvider = ({ children }) => {
           const signer = await provider.getSigner();
 
           const contractInstance = new ethers.Contract(
-            "0xF4bEf358F5Ca57C8F570Bef51BE3C238A933eAdb",
+            "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
             CampaignFactoryABI.abi,
             signer
           );
@@ -630,7 +630,7 @@ export const StateContextProvider = ({ children }) => {
       // Use JsonRpcProvider for consistent provider access
       const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545/");
       const contractWithProvider = new ethers.Contract(
-        "0xF4bEf358F5Ca57C8F570Bef51BE3C238A933eAdb", // Your contract address
+        "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621", // Your contract address
         CampaignFactoryABI.abi,
         provider
       );
@@ -668,7 +668,7 @@ export const StateContextProvider = ({ children }) => {
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
         //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-        "0xF4bEf358F5Ca57C8F570Bef51BE3C238A933eAdb",
+        "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
         CampaignFactoryABI.abi,
         signer
       );
@@ -738,7 +738,7 @@ export const StateContextProvider = ({ children }) => {
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
         //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-        "0xF4bEf358F5Ca57C8F570Bef51BE3C238A933eAdb",
+        "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
         CampaignFactoryABI.abi,
         signer
       );
