@@ -46,7 +46,6 @@ export class VerificationService {
     
     if (record.otp === otp && record.expiry > new Date()) {
       try {
-        // Create the user now that email is verified
         const user = await prisma.user.create({
           data: {
             email,
