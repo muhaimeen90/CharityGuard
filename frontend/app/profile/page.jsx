@@ -11,7 +11,12 @@ import Loader from "../components/Loader";
 
 const ProfilePage = () => {
   const { data: session } = useSession();
-  const { address, getUserCampaigns, userCampaigns, isLoading: contextLoading } = useStateContext();
+  const {
+    address,
+    getUserCampaigns,
+    userCampaigns,
+    isLoading: contextLoading,
+  } = useStateContext();
   const [isLoading, setIsLoading] = useState(true);
   const [userInfo, setUserInfo] = useState(null);
   const router = useRouter();
@@ -26,7 +31,7 @@ const ProfilePage = () => {
         });
       }
     };
-    
+
     fetchUserInfo();
   }, [session]);
 
@@ -57,9 +62,9 @@ const ProfilePage = () => {
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             {/* Profile Picture */}
             <div className="w-[120px] h-[120px] rounded-full bg-[#2c2f32] flex items-center justify-center">
-              <img 
-                src="/images/profile.svg" 
-                alt="profile" 
+              <img
+                src="/images/profile.svg"
+                alt="profile"
                 className="w-1/2 h-1/2 object-contain"
               />
             </div>
@@ -70,24 +75,28 @@ const ProfilePage = () => {
                 {userInfo?.email || "User"}
               </h2>
               <p className="mt-1 font-epilogue text-[#808191]">
-                Role: <span className="text-white">{userInfo?.role || "N/A"}</span>
+                Role:{" "}
+                <span className="text-white">{userInfo?.role || "N/A"}</span>
               </p>
               <p className="mt-1 font-epilogue text-[#808191]">
-                Wallet: <span className="text-white break-all">{address || "Not connected"}</span>
+                Wallet:{" "}
+                <span className="text-white break-all">
+                  {address || "Not connected"}
+                </span>
               </p>
 
               <div className="mt-4 flex flex-wrap gap-3">
-                <CustomButton 
+                <CustomButton
                   btnType="button"
                   title="Create Campaign"
                   styles="bg-[#8c6dfd] hover:bg-[#7b5de8]"
-                  handleClick={() => router.push('/create-campaign')}
+                  handleClick={() => router.push("/create-campaign")}
                 />
               </div>
             </div>
           </div>
         </div>
-        
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-[#1c1c24] rounded-[15px] p-4">
@@ -96,20 +105,26 @@ const ProfilePage = () => {
             </h3>
             <p className="font-epilogue text-[#808191]">Campaigns Created</p>
           </div>
-          
+
           <div className="bg-[#1c1c24] rounded-[15px] p-4">
-            <h3 className="font-epilogue font-semibold text-[18px] text-white">0</h3>
+            <h3 className="font-epilogue font-semibold text-[18px] text-white">
+              0
+            </h3>
             <p className="font-epilogue text-[#808191]">Campaigns Funded</p>
           </div>
-          
+
           <div className="bg-[#1c1c24] rounded-[15px] p-4">
-            <h3 className="font-epilogue font-semibold text-[18px] text-white">0 ETH</h3>
+            <h3 className="font-epilogue font-semibold text-[18px] text-white">
+              0 ETH
+            </h3>
             <p className="font-epilogue text-[#808191]">Total Donations</p>
           </div>
         </div>
 
         {/* User Campaigns */}
-        {isLoading || contextLoading ? <Loader /> : (
+        {isLoading || contextLoading ? (
+          <Loader />
+        ) : (
           <DisplayCampaigns
             title="Your Campaigns"
             isLoading={false}

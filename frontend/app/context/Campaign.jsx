@@ -627,18 +627,17 @@ export const StateContextProvider = ({ children }) => {
 
     setIsLoading(true);
     try {
-      // Use JsonRpcProvider for consistent provider access
-      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545/");
-      const contractWithProvider = new ethers.Contract(
-        "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621", // Your contract address
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(
+        //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+        "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
         CampaignFactoryABI.abi,
-        provider
+        signer
       );
 
       // Use the connected wallet address
-      const userCampaignsList = await contractWithProvider.getUserCampaigns(
-        address
-      );
+      const userCampaignsList = await contract.getUserCampaigns(address);
       console.log("User campaigns fetched:", userCampaignsList);
 
       setUserCampaigns(userCampaignsList || []);
