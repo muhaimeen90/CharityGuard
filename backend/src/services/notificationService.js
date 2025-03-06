@@ -58,4 +58,32 @@ export class NotificationService {
       { campaignTitle }
     );
   }
+
+  static async notifyDonationReceived(userId, campaignTitle, amount) {
+    return await this.createNotification(
+      userId,
+      'DONATION_RECEIVED',
+      `Someone donated ${amount} ETH to your campaign "${campaignTitle}"`,
+      { campaignTitle, amount }
+    );
+  }
+
+  static async notifyDeadlineApproaching(userId, campaignTitle, campaignId) {
+    return await this.createNotification(
+      userId,
+      'CAMPAIGN_DEADLINE',
+      `Your campaign "${campaignTitle}" will reach its deadline within 24 hours.`,
+      { campaignTitle, campaignId, approaching: true }
+    );
+  }
+
+  static async notifyDeadlineReached(userId, campaignTitle, campaignId) {
+    return await this.createNotification(
+      userId,
+      'CAMPAIGN_DEADLINE',
+      `Your campaign "${campaignTitle}" has reached its deadline.`,
+      { campaignTitle, campaignId, approaching: false }
+    );
+  }
 }
+
