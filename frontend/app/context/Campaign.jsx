@@ -621,24 +621,7 @@ export const StateContextProvider = ({ children }) => {
   useEffect(() => {
     fetchCampaigns();
   }, []);
-  // Add after the existing useEffect that fetchs campaigns (around line 614)
 
-// Add a separate useEffect for deadline checks
-useEffect(() => {
-  if (campaigns.length > 0 && session?.user) {
-    // Check deadlines immediately after campaigns are loaded
-    checkCampaignDeadlines();
-    
-    // Set up interval to periodically check deadlines (every 6 hours)
-    const deadlineInterval = setInterval(() => {
-      checkCampaignDeadlines();
-    }, 6 * 60 * 60 * 1000); // Check every 6 hours
-    
-    return () => {
-      clearInterval(deadlineInterval);
-    };
-  }
-}, [campaigns, session]);
   // Update the getUserCampaigns function:
 
   const getUserCampaigns = async () => {
@@ -671,7 +654,6 @@ useEffect(() => {
     }
   };
 
-<<<<<<< HEAD
   const campaignsDonatedTo = async () => {
     if (!address) return;
 
@@ -702,46 +684,6 @@ useEffect(() => {
     }
   };
 
-=======
-  // Add this function to the Campaign component
-
-const getCampaignsByOwner = async (ownerAddress) => {
-  if (!ownerAddress) return [];
-  
-  setIsLoading(true);
-  
-  try {
-    // Get campaigns from the blockchain
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
-    const contract = new ethers.Contract(
-      "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
-      CampaignFactoryABI.abi,
-      signer
-    );
-    
-    // First check if we already have campaigns loaded
-    let allCampaigns = campaigns;
-    if (allCampaigns.length === 0) {
-      allCampaigns = await contract.getCampaigns();
-    }
-    
-    // Filter campaigns by owner
-    const ownerCampaigns = allCampaigns.filter(
-      campaign => campaign[5].toLowerCase() === ownerAddress.toLowerCase()
-    );
-    
-    return ownerCampaigns;
-  } catch (error) {
-    console.error("Failed to fetch campaigns by owner:", error);
-    return [];
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-  
->>>>>>> c792bc608e744586bfb1e504720918c7289a8a18
   const createCampaign = async (form) => {
     setIsLoading(true);
     try {
@@ -860,39 +802,9 @@ const getCampaignsByOwner = async (ownerAddress) => {
           { campaignId, campaignTitle, amount: donationAmount }
         );
       }
-      try {
-        // Find the campaign owner's ID from the database
-        const ownerResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/address/${campaign.owner}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.accessToken}`
-          }
-        });
-        
-        if (ownerResponse.ok) {
-          const ownerData = await ownerResponse.json();
-          // Create notification for the campaign owner
-          await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${session?.accessToken}`
-            },
-            body: JSON.stringify({
-              userId: ownerData.id,
-              type: 'DONATION_RECEIVED',
-              message: `Someone donated ${donationAmount} ETH to your campaign "${campaignTitle}"`,
-              data: { campaignId, campaignTitle, amount: donationAmount }
-            })
-          });
-        }
-      } catch (error) {
-        console.error("Failed to notify campaign owner:", error);
-      }
-      
+
       alert("Donation successful!");
-      
+
       // Refresh the campaigns list after donation
       await fetchCampaigns();
     } catch (error) {
@@ -901,133 +813,7 @@ const getCampaignsByOwner = async (ownerAddress) => {
     } finally {
       setIsLoading(false);
     }
-    // In the donate function, after successful donation and before the alerts:
-
-// Check if the campaign reached a milestone
-try {
-  // Calculate campaign progress percentage
-  const goalWei = ethers.parseEther(campaign.goal.toString());
-  const raisedWithNewDonation = ethers.parseEther(campaign.raised.toString()) + donationAmountWei;
-  const progressPercentage = Math.floor((raisedWithNewDonation * BigInt(100)) / goalWei);
-  
-  // Define milestones (25%, 50%, 75%, 100%)
-  const milestones = [25, 50, 75, 100];
-  
-  // Check if a milestone was just crossed
-  for (const milestone of milestones) {
-    const previousProgress = Math.floor((ethers.parseEther(campaign.raised.toString()) * BigInt(100)) / goalWei);
-    
-    // If we just crossed this milestone
-    if (progressPercentage >= milestone && previousProgress < milestone) {
-      // Find the campaign owner's ID from the database
-      const ownerResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/address/${campaign.owner}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.accessToken}`
-        }
-      });
-      
-      if (ownerResponse.ok) {
-        const ownerData = await ownerResponse.json();
-        // Create milestone notification for the campaign owner
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.accessToken}`
-          },
-          body: JSON.stringify({
-            userId: ownerData.id,
-            type: 'CAMPAIGN_MILESTONE',
-            message: `Your campaign "${campaignTitle}" has reached ${milestone}% of its goal!`,
-            data: { campaignId, campaignTitle, milestone }
-          })
-        });
-      }
-      
-      // If we've reached 100%, send a completion notification
-      if (milestone === 100) {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.accessToken}`
-          },
-          body: JSON.stringify({
-            userId: ownerData.id,
-            type: 'CAMPAIGN_COMPLETE',
-            message: `Congratulations! Your campaign "${campaignTitle}" has been fully funded!`,
-            data: { campaignId, campaignTitle }
-          })
-        });
-      }
-    }
-  }
-} catch (error) {
-  console.error("Failed to check campaign milestone:", error);
-}
   };
-  // Add after the donate function (around line 922)
-
-// Function to check campaign deadlines
-const checkCampaignDeadlines = async () => {
-  try {
-    if (!campaigns || !campaigns.length || !session?.user) return;
-    
-    const now = Date.now();
-    
-    for (const campaign of campaigns) {
-      // Skip if campaign is not active
-      if (!campaign.isActive) continue;
-      
-      const deadline = Number(campaign.deadline) * 1000; // Convert to milliseconds
-      
-      // If deadline is within 24 hours or has passed and notification hasn't been sent yet
-      if (deadline <= now + 24 * 60 * 60 * 1000 && deadline > now - 24 * 60 * 60 * 1000) {
-        try {
-          // Find the campaign owner's ID from the database
-          const ownerResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/address/${campaign.owner}`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${session?.accessToken}`
-            }
-          });
-          
-          if (ownerResponse.ok) {
-            const ownerData = await ownerResponse.json();
-            
-            // Create deadline notification for the campaign owner
-            await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${session?.accessToken}`
-              },
-              body: JSON.stringify({
-                userId: ownerData.id,
-                type: 'CAMPAIGN_DEADLINE',
-                message: deadline <= now 
-                  ? `Your campaign "${campaign.title}" has reached its deadline.` 
-                  : `Your campaign "${campaign.title}" will reach its deadline within 24 hours.`,
-                data: { 
-                  campaignId: campaign.id, 
-                  campaignTitle: campaign.title,
-                  deadlineReached: deadline <= now
-                }
-              })
-            });
-          }
-        } catch (error) {
-          console.error(`Failed to send deadline notification for campaign ${campaign.id}:`, error);
-        }
-      }
-    }
-  } catch (error) {
-    console.error("Failed to check campaign deadlines:", error);
-  }
-};
 
   return (
     <StateContext.Provider
@@ -1036,7 +822,6 @@ const checkCampaignDeadlines = async () => {
         connect,
         campaigns,
         fetchCampaigns,
-        getCampaignsByOwner, // Add this line
         isLoading,
         getUserCampaigns,
         userCampaigns,

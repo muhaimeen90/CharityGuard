@@ -11,7 +11,12 @@ import { useSession } from "next-auth/react";
 
 const UserProfilePage = () => {
   const { address: userAddress } = useParams();
-  const { campaigns, fetchCampaigns, getCampaignsByOwner, isLoading: contextLoading } = useStateContext();
+  const {
+    campaigns,
+    fetchCampaigns,
+    getCampaignsByOwner,
+    isLoading: contextLoading,
+  } = useStateContext();
   const [userCampaigns, setUserCampaigns] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [donationsTotal, setDonationsTotal] = useState(0);
@@ -23,16 +28,18 @@ const UserProfilePage = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       if (!userAddress) return;
-      
+
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/users/wallet/${userAddress}`
+          `${
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
+          }/api/users/wallet/${userAddress}`
         );
-        
+
         if (!response.ok) {
-          throw new Error('Failed to fetch user data');
+          throw new Error("Failed to fetch user data");
         }
-        
+
         const data = await response.json();
         setUserData(data);
       } catch (err) {
@@ -40,7 +47,7 @@ const UserProfilePage = () => {
         setError("Failed to load user information");
       }
     };
-    
+
     fetchUserData();
   }, [userAddress]);
 
@@ -52,21 +59,23 @@ const UserProfilePage = () => {
         if (campaigns.length === 0) {
           await fetchCampaigns();
         }
-        
+
         const filteredCampaigns = campaigns.filter(
-          campaign => campaign[5]?.toLowerCase() === userAddress?.toLowerCase()
+          (campaign) =>
+            campaign[5]?.toLowerCase() === userAddress?.toLowerCase()
         );
-        
+
         setUserCampaigns(filteredCampaigns);
-        
+
         // Calculate total donations
         let total = 0;
-        filteredCampaigns.forEach(campaign => {
-          if (campaign[4]) { // campaign[4] contains the raised amount
+        filteredCampaigns.forEach((campaign) => {
+          if (campaign[4]) {
+            // campaign[4] contains the raised amount
             total += Number(ethers.formatEther(campaign[4].toString()));
           }
         });
-        
+
         setDonationsTotal(total.toFixed(2));
       } catch (error) {
         console.error("Failed to load user campaigns:", error);
@@ -99,22 +108,24 @@ const UserProfilePage = () => {
             <h2 className="font-epilogue font-bold text-[24px] text-white">
               Creator Profile
             </h2>
-            
+
             {isLoading ? (
-              <p className="font-epilogue font-normal text-[16px] text-[#808191]">Loading...</p>
+              <p className="font-epilogue font-normal text-[16px] text-[#808191]">
+                Loading...
+              </p>
             ) : userData ? (
               <>
                 <p className="font-epilogue font-normal text-[16px] text-[#808191]">
-                  <span className="text-white">Email: </span> 
+                  <span className="text-white">Email: </span>
                   {userData.email || "Not provided"}
                 </p>
                 <p className="font-epilogue font-normal text-[16px] text-[#808191] break-all">
-                  <span className="text-white">Wallet Address: </span> 
+                  <span className="text-white">Wallet Address: </span>
                   {userData.smartWalletAddress || userAddress}
                 </p>
                 {userData.role && (
                   <p className="font-epilogue font-normal text-[16px] text-[#808191]">
-                    <span className="text-white">Role: </span> 
+                    <span className="text-white">Role: </span>
                     {userData.role}
                   </p>
                 )}
@@ -122,7 +133,9 @@ const UserProfilePage = () => {
             ) : (
               <p className="font-epilogue font-normal text-[16px] text-[#808191] break-all">
                 {userAddress}
-                {error && <span className="text-red-500 block mt-2">{error}</span>}
+                {error && (
+                  <span className="text-red-500 block mt-2">{error}</span>
+                )}
               </p>
             )}
           </div>
