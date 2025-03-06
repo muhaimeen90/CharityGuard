@@ -368,8 +368,8 @@ export const StateContextProvider = ({ children }) => {
     }
   };
 
-  const campaignsDonatedTo = async () => {
-    if (!address) return;
+  const campaignsDonatedTo = async (waddress) => {
+    if (!waddress) return;
 
     setIsLoading(true);
     try {
@@ -383,7 +383,7 @@ export const StateContextProvider = ({ children }) => {
       );
 
       // Use the connected wallet address
-      const userCampaignsList = await contract.getUserDonations(address);
+      const userCampaignsList = await contract.getUserDonations(waddress);
       console.log("User's donated campaigns fetched:", userCampaignsList);
 
       setDonatedCampaigns(userCampaignsList || []);
@@ -465,7 +465,7 @@ export const StateContextProvider = ({ children }) => {
         if (ownerResponse.ok) {
           const ownerData = await ownerResponse.json();
           console.log("Campaign owner data:", ownerData); // Add debug log
-          
+
           // Create notification for the campaign owner
           const notificationResponse = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/api/notifications`,
@@ -483,19 +483,30 @@ export const StateContextProvider = ({ children }) => {
               }),
             }
           );
-          
+
           if (!notificationResponse.ok) {
-            console.error("Failed to create owner notification:", await notificationResponse.text());
+            console.error(
+              "Failed to create owner notification:",
+              await notificationResponse.text()
+            );
           }
         } else {
-          console.error("Failed to fetch owner data:", await ownerResponse.text());
+          console.error(
+            "Failed to fetch owner data:",
+            await ownerResponse.text()
+          );
         }
       } catch (error) {
         console.error("Failed to notify campaign owner:", error);
       }
 
       // Check if the campaign reached a milestone - moved after owner notification
-      await checkCampaignMilestone(campaign, campaignTitle, campaignId, donationAmountWei);
+      await checkCampaignMilestone(
+        campaign,
+        campaignTitle,
+        campaignId,
+        donationAmountWei
+      );
 
       alert("Donation successful!");
 

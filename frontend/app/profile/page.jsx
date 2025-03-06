@@ -10,6 +10,7 @@ import CustomButton from "../components/CustomButton";
 import Loader from "../components/Loader";
 import Image from "next/image";
 import { profile } from "../assets";
+import { add } from "date-fns";
 
 const ProfilePage = () => {
   const { data: session } = useSession();
@@ -48,16 +49,16 @@ const ProfilePage = () => {
         try {
           if (userInfo.role == "CHARITY") {
             await getUserCampaigns();
-            await campaignsDonatedTo();
+            await campaignsDonatedTo(address);
             setUsersDonatedCampaigns(donatedCampaigns || []);
 
             setUsersCampaigns(userCampaigns || []); // Ensure userCampaigns is not undefined
           } else if (userInfo.role == "DONOR") {
-            await campaignsDonatedTo();
+            await campaignsDonatedTo(address);
             setUsersDonatedCampaigns(donatedCampaigns || []); // Ensure donatedCampaigns is not undefined
           } else {
             await getUserCampaigns();
-            await campaignsDonatedTo();
+            await campaignsDonatedTo(address);
             setUsersDonatedCampaigns(donatedCampaigns || []);
             setUsersCampaigns(userCampaigns || []); // Ensure userCampaigns is not undefined
           }

@@ -78,30 +78,50 @@ export default function CampaignDetailsPage() {
   return (
     <div>
       <div>
-        <h4 className="font-epilogue font-semibold text-[18px] text-white uppercase">
-          Donators
-        </h4>
+        <div>
+          <h4 className="font-epilogue font-semibold text-[18px] text-white uppercase">
+            Donators
+          </h4>
 
-        <div className="mt-[20px] flex flex-col gap-4">
-          {campaignDonors.length > 0 ? (
-            campaignDonors.map((donor, index) => (
-              <div
-                key={`${donor.donorAddress}-${index}`}
-                className="flex justify-between items-center gap-4"
-              >
-                <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
-                  {index + 1}. {donor.donorAddress}
-                </p>
-                <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] break-all">
-                  {weiToEth(donor.amount)} ETH
-                </p>
-              </div>
-            ))
-          ) : (
-            <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">
-              No donators yet. Be the first one!
-            </p>
-          )}
+          <div className="mt-[20px] flex flex-col gap-4">
+            {campaignDonors.length > 0 ? (
+              campaignDonors.map((donor, index) => (
+                <div
+                  key={`${donor.donorAddress}-${index}`}
+                  className="flex justify-between items-center gap-4 cursor-pointer hover:bg-[#2a2a35] p-2 rounded-lg transition-all"
+                  onClick={() =>
+                    router.push(`/user-profile/${donor.donorAddress}`)
+                  }
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-[52px] h-[52px] flex items-center justify-center rounded-full bg-[#2c2f32]">
+                      <Image
+                        src={profile}
+                        alt="profile"
+                        height={150}
+                        width={150}
+                      />
+                    </div>
+                    <div>
+                      <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-all">
+                        {index + 1}. {donor.donorAddress}
+                      </p>
+                      <p className="font-epilogue font-normal text-[12px] text-[#808191]">
+                        View donor profile
+                      </p>
+                    </div>
+                  </div>
+                  <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] break-all">
+                    {weiToEth(donor.amount)} ETH
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">
+                No donators yet. Be the first one!
+              </p>
+            )}
+          </div>
         </div>
       </div>
 

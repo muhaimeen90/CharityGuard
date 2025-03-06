@@ -6,6 +6,8 @@ import loader from "../assets/loader.svg";
 import { weiToEth } from "../utils";
 
 const DisplayCampaigns = ({ title, isLoading, campaigns = [] }) => {
+  if(title === "Campaigns Supported")
+    console.log("DisplayCampaigns:", campaigns);
   const router = useRouter();
 
   const handleNavigate = (campaign) => {

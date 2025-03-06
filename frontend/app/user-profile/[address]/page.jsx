@@ -15,6 +15,8 @@ const UserProfilePage = () => {
   const {
     campaigns,
     fetchCampaigns,
+    campaignsDonatedTo,
+    donatedCampaigns,
     getCampaignsByOwner,
     isLoading: contextLoading,
   } = useStateContext();
@@ -24,24 +26,26 @@ const UserProfilePage = () => {
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState(null);
   const { data: session } = useSession();
+  //const [usersCampaigns, setUsersCampaigns] = useState([]); // Use state for campaigns
+  const [usersDonatedCampaigns, setUsersDonatedCampaigns] = useState([]); // Use state for donated campaigns
 
   // Fetch user data from backend
   useEffect(() => {
     const fetchUserData = async () => {
       if (!userAddress) return;
-      
+
       setIsLoading(true);
       try {
         console.log(`Fetching user data for address: ${userAddress}`);
         // Use the Next.js API route
         const response = await fetch(`/api/users/address/${userAddress}`);
-        
+
         if (!response.ok) {
           const errorData = await response.json();
           console.error("Error response:", errorData);
-          throw new Error(errorData.error || 'Failed to fetch user data');
+          throw new Error(errorData.error || "Failed to fetch user data");
         }
-        
+
         const data = await response.json();
         console.log("User data fetched:", data);
         setUserData(data);
@@ -54,24 +58,29 @@ const UserProfilePage = () => {
     fetchUserData();
   }, [userAddress]);
 
-  // Fetch user campaigns
   useEffect(() => {
     const loadUserCampaigns = async () => {
       try {
-        if (campaigns.length === 0) {
-          await fetchCampaigns();
+        if (userData?.role === "CHARITY" || userData?.role === "FUNDRAISER") {
+          console.log("User is a charity or fundraiser");
+          const filteredCampaigns = campaigns.filter(
+            (campaign) =>
+              campaign[5]?.toLowerCase() == userAddress?.toLowerCase()
+          );
+          setUserCampaigns(filteredCampaigns);
         }
 
-        const filteredCampaigns = campaigns.filter(
-          (campaign) =>
-            campaign[5]?.toLowerCase() === userAddress?.toLowerCase()
-        );
+        // Fetch donated campaigns for all users
 
-        setUserCampaigns(filteredCampaigns);
+        // Fetch if userData is available
+        console.log("Fetching donated campaigns for:", userAddress);
+        await campaignsDonatedTo(userAddress);
+        setUsersDonatedCampaigns(donatedCampaigns);
+        console.log("userscamp", usersDonatedCampaigns); // Update state after fetching
+        console.log("donatedCampaigns", donatedCampaigns);
 
-        // Calculate total donations
         let total = 0;
-        filteredCampaigns.forEach((campaign) => {
+        userCampaigns.forEach((campaign) => {
           if (campaign[4]) {
             // campaign[4] contains the raised amount
             total += Number(ethers.formatEther(campaign[4].toString()));
@@ -86,10 +95,63 @@ const UserProfilePage = () => {
       }
     };
 
-    if (userAddress) {
+    if (userAddress && userData) {
+      // Load only when both are available
       loadUserCampaigns();
     }
-  }, [userAddress, campaigns, fetchCampaigns]);
+  }, [userAddress, userData]); // Dependency on userData
+
+  // Fetch user campaigns
+  // useEffect(() => {
+  //   const loadUserCampaigns = async () => {
+  //     try {
+  //       if (campaigns.length === 0) {
+  //         await fetchCampaigns();
+  //       }
+  //       //let filteredCampaigns = [];
+  //       if (userData?.role == "CHARITY" || userData?.role == "FUNDRAISER") {
+  //         console.log("User is a charity or fundraiser");
+  //         const filteredCampaigns = campaigns.filter(
+  //           (campaign) =>
+  //             campaign[5]?.toLowerCase() == userAddress?.toLowerCase()
+  //         );
+
+  //         setUserCampaigns(filteredCampaigns);
+  //         await campaignsDonatedTo(userAddress);
+  //         //setUsersDonatedCampaigns(donatedCampaigns || []);
+  //       } else if (userData?.role == "DONOR") {
+  //         console.log("User is a donor");
+  //         await campaignsDonatedTo(userAddress);
+  //       }
+
+  //       //setUserCampaigns(donatedCampaigns);
+  //       //console.log("Donated campaigns:");
+  //       //setUsersDonatedCampaigns(donatedCampaigns);
+  //       // Calculate total donations
+  //       let total = 0;
+  //       userCampaigns.forEach((campaign) => {
+  //         if (campaign[4]) {
+  //           // campaign[4] contains the raised amount
+  //           total += Number(ethers.formatEther(campaign[4].toString()));
+  //         }
+  //       });
+
+  //       setDonationsTotal(total.toFixed(2));
+  //     } catch (error) {
+  //       console.error("Failed to load user campaigns:", error);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+  //   if (userAddress) {
+  //     loadUserCampaigns();
+  //   }
+  // }, [userAddress, userData, campaigns]);
+
+  console.log("User campaigns:", userCampaigns);
+  console.log("Donated campaigns:", donatedCampaigns);
+  console.log("User data:", userData);
 
   return (
     <div className="flex flex-col">
@@ -137,9 +199,11 @@ const UserProfilePage = () => {
 
       {/* User Campaigns */}
       <div>
-        <h2 className="font-epilogue font-semibold text-[18px] text-white mb-4">
-          {userData?.role === "CHARITY" ? "Campaigns Created" : "Campaigns Supported"}
-        </h2>
+        {/* <h2 className="font-epilogue font-semibold text-[18px] text-white mb-4">
+          {userData?.role === "CHARITY"
+            ? "Campaigns Created"
+            : "Campaigns Supported"}
+        </h2> */}
 
         {isLoading && <Loader />}
 
@@ -151,8 +215,16 @@ const UserProfilePage = () => {
 
         {!isLoading && userCampaigns.length > 0 && (
           <DisplayCampaigns
-            title="All Campaigns"
+            title="Campaigns Created"
             campaigns={userCampaigns}
+            address={userAddress}
+          />
+        )}
+
+        {!isLoading && userCampaigns.length > 0 && (
+          <DisplayCampaigns
+            title="Campaigns Supported"
+            campaigns={usersDonatedCampaigns}
             address={userAddress}
           />
         )}
