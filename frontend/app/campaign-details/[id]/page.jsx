@@ -133,8 +133,8 @@ import CustomButton from "../../components/CustomButton";
 import FormField from "../../components/FormField";
 import { daysLeft, weiToEth } from "../../utils";
 import Loader from "../../components/Loader"; // Assuming you have a Loader component
-import { thirdweb2 } from "../../assets"; // Assuming you have the thirdweb logo
-//import
+import { profile } from "../../assets"; // Assuming you have the thirdweb logo
+import Image from "next/image";
 
 export default function CampaignDetailsPage() {
   const { id } = useParams();
@@ -268,13 +268,13 @@ export default function CampaignDetailsPage() {
 
             <div className="mt-[20px] flex flex-row items-center flex-wrap gap-[14px]">
               <div className="w-[52px] h-[52px] flex items-center justify-center rounded-full bg-[#2c2f32] cursor-pointer">
-                <img
+                {/* <img
                   src={thirdweb2}
                   alt="user"
                   className="w-[60%] h-[60%] object-contain"
-                />
-                {/*                 
-                <Image src={sea} alt="search" height={15} width={15} /> */}
+                /> */}
+
+                <Image src={profile} alt="profile" height={150} width={150} />
               </div>
               <div>
                 <h4 className="font-epilogue font-semibold text-[14px] text-white break-all">

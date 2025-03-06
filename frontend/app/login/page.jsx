@@ -66,11 +66,13 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            
+
             {error && (
-              <p className="font-epilogue font-normal text-[16px] text-red-500">{error}</p>
+              <p className="font-epilogue font-normal text-[16px] text-red-500">
+                {error}
+              </p>
             )}
-            
+
             <CustomButton
               btnType="submit"
               title={isLoading ? "Signing in..." : "Login"}
@@ -79,7 +81,7 @@ export default function LoginPage() {
             />
           </div>
         </form>
-        
+
         <p className="font-epilogue font-normal text-[16px] text-[#808191] mt-6">
           Don't have an account?{" "}
           <Link href="/register" className="text-[#1dc071] cursor-pointer">

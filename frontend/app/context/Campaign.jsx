@@ -411,6 +411,8 @@ const StateContext = createContext();
 export const StateContextProvider = ({ children }) => {
   const [campaigns, setCampaigns] = useState([]);
   const [userCampaigns, setUserCampaigns] = useState([]);
+  const [donatedCampaigns, setDonatedCampaigns] = useState([]);
+  //const [campaignsDonatedTo, setCampaignsDonatedTo] = useState([]);
   const [donors, setDonors] = useState([]);
   const [recipients, setRecipients] = useState([]);
   const [address, setAddress] = useState(null);
@@ -651,6 +653,37 @@ export const StateContextProvider = ({ children }) => {
       setIsLoading(false);
     }
   };
+
+  const campaignsDonatedTo = async () => {
+    if (!address) return;
+
+    setIsLoading(true);
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(
+        //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+        "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
+        CampaignFactoryABI.abi,
+        signer
+      );
+
+      // Use the connected wallet address
+      const userCampaignsList = await contract.getUserDonations(address);
+      console.log("User's donated campaigns fetched:", userCampaignsList);
+
+      setDonatedCampaigns(userCampaignsList || []);
+
+      return userCampaignsList;
+    } catch (error) {
+      console.error("Failed to fetch user donated campaigns:", error);
+      setDonatedCampaigns([]); // Set to empty array on error
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const createCampaign = async (form) => {
     setIsLoading(true);
     try {
@@ -798,6 +831,8 @@ export const StateContextProvider = ({ children }) => {
         fetchDonors,
         recipients,
         fetchRecipients,
+        campaignsDonatedTo,
+        donatedCampaigns,
       }}
     >
       {children}

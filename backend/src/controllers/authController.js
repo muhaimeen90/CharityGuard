@@ -1,4 +1,4 @@
-import { AuthService } from '../services/authService.js';
+import { AuthService } from "../services/authService.js";
 
 export class AuthController {
   static async register(req, res) {
@@ -12,12 +12,12 @@ export class AuthController {
 
   static async login(req, res) {
     try {
-        const { email, password } = req.body;
-        const user = await AuthService.loginUser(email, password);
-        const token = AuthService.generateToken(user);
-        res.status(200).json({ user, token });
-      } catch (error) {
-        res.status(400).json({ error: error.message });
+      const { email, password } = req.body;
+      const user = await AuthService.loginUser(email, password);
+      const token = AuthService.generateToken(user);
+      res.status(200).json({ user, token });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
     }
   }
 }
