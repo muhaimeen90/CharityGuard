@@ -25,12 +25,14 @@ export default function HomePage() {
     loadCampaigns();
   }, []); // Only run once on mount, removing fetchCampaigns from dependencies
 
+  const activeCampaigns = campaigns.filter((campaign) => campaign.isActive);
+
   return (
     <ProtectedRoute>
       <DisplayCampaigns
         title="All Campaigns"
         isLoading={isLoading}
-        campaigns={campaigns}
+        campaigns={activeCampaigns}
       />
     </ProtectedRoute>
   );
