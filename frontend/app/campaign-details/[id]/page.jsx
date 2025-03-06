@@ -134,6 +134,7 @@ import FormField from "../../components/FormField";
 import { daysLeft, weiToEth } from "../../utils";
 import Loader from "../../components/Loader"; // Assuming you have a Loader component
 import { thirdweb2 } from "../../assets"; // Assuming you have the thirdweb logo
+
 //import
 
 export default function CampaignDetailsPage() {
@@ -260,33 +261,33 @@ export default function CampaignDetailsPage() {
       <div className="mt-[60px] flex lg:flex-row flex-col gap-5">
         {/* Left Section */}
         <div className="flex-[2] flex flex-col gap-[40px]">
-          {/* Creator Section */}
-          <div>
-            <h4 className="font-epilogue font-semibold text-[18px] text-white uppercase">
-              Creator
-            </h4>
+         {/* Creator Section */}
+<div>
+  <h4 className="font-epilogue font-semibold text-[18px] text-white uppercase">
+    Creator
+  </h4>
 
-            <div className="mt-[20px] flex flex-row items-center flex-wrap gap-[14px]">
-              <div className="w-[52px] h-[52px] flex items-center justify-center rounded-full bg-[#2c2f32] cursor-pointer">
-                <img
-                  src={thirdweb2}
-                  alt="user"
-                  className="w-[60%] h-[60%] object-contain"
-                />
-                {/*                 
-                <Image src={sea} alt="search" height={15} width={15} /> */}
-              </div>
-              <div>
-                <h4 className="font-epilogue font-semibold text-[14px] text-white break-all">
-                  {campaign.owner}
-                </h4>
-                <p className="mt-[4px] font-epilogue font-normal text-[12px] text-[#808191]">
-                  10 Campaigns
-                </p>
-              </div>
-            </div>
-          </div>
-
+  <div 
+    className="mt-[20px] flex flex-row items-center flex-wrap gap-[14px] cursor-pointer hover:bg-[#2a2a35] p-2 rounded-lg transition-all"
+    onClick={() => router.push(`/user-profile/${campaign.owner}`)}
+  >
+    <div className="w-[52px] h-[52px] flex items-center justify-center rounded-full bg-[#2c2f32]">
+      <img
+        src={thirdweb2}
+        alt="user"
+        className="w-[60%] h-[60%] object-contain"
+      />
+    </div>
+    <div>
+      <h4 className="font-epilogue font-semibold text-[14px] text-white break-all">
+        {campaign.owner}
+      </h4>
+      <p className="font-epilogue font-normal text-[12px] text-[#808191]">
+        View creator profile
+      </p>
+    </div>
+  </div>
+</div>
           {/* Story Section */}
           <div>
             <h4 className="font-epilogue font-semibold text-[18px] text-white uppercase">

@@ -8,9 +8,11 @@ import ProtectedRoute from "../components/ProtectedRoute";
 const getNotificationTypeStyle = (type) => {
   const styles = {
     DONATION: "bg-blue-500",
+    DONATION_RECEIVED: "bg-green-500", // New type for campaign owners
     CAMPAIGN_CREATED: "bg-green-500",
-    CAMPAIGN_MILESTONE: "bg-yellow-500",
+    CAMPAIGN_MILESTONE: "bg-yellow-500", 
     CAMPAIGN_COMPLETE: "bg-purple-500",
+    CAMPAIGN_DEADLINE: "bg-red-500", // New type for deadlines
     SYSTEM: "bg-gray-500"
   };
   
