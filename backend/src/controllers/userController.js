@@ -9,12 +9,15 @@ export class UserController {
         return res.status(400).json({ error: 'Wallet address is required' });
       }
       
+      console.log(`Searching for user with wallet address: ${address}`);
       const user = await UserService.findByWalletAddress(address);
       
       if (!user) {
+        console.log(`User with wallet address ${address} not found`);
         return res.status(404).json({ error: 'User not found' });
       }
       
+      console.log(`Found user: ${user.id}`);
       // Return user data including email and wallet address but exclude sensitive info
       res.status(200).json({
         id: user.id,
@@ -51,6 +54,4 @@ export class UserController {
       res.status(500).json({ error: 'Server error' });
     }
   }
-
-  // Add more controller methods as needed
 }

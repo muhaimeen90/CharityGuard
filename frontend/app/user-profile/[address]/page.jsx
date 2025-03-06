@@ -29,23 +29,25 @@ const UserProfilePage = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       if (!userAddress) return;
-
+      
+      setIsLoading(true);
       try {
-        const response = await fetch(
-          `${
-            process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-          }/api/users/wallet/${userAddress}`
-        );
-
+        console.log(`Fetching user data for address: ${userAddress}`);
+        // Use the Next.js API route
+        const response = await fetch(`/api/users/address/${userAddress}`);
+        
         if (!response.ok) {
-          throw new Error("Failed to fetch user data");
+          const errorData = await response.json();
+          console.error("Error response:", errorData);
+          throw new Error(errorData.error || 'Failed to fetch user data');
         }
-
+        
         const data = await response.json();
+        console.log("User data fetched:", data);
         setUserData(data);
       } catch (err) {
         console.error("Error fetching user data:", err);
-        setError("Failed to load user information");
+        setError(err.message || "Failed to load user information");
       }
     };
 
@@ -55,7 +57,6 @@ const UserProfilePage = () => {
   // Fetch user campaigns
   useEffect(() => {
     const loadUserCampaigns = async () => {
-      setIsLoading(true);
       try {
         if (campaigns.length === 0) {
           await fetchCampaigns();
@@ -94,78 +95,68 @@ const UserProfilePage = () => {
     <div className="flex flex-col">
       {/* User Profile Card */}
       <div className="bg-[#1c1c24] rounded-[20px] p-6 mb-8">
-        <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-          {/* Profile Picture */}
-          <div className="w-[120px] h-[120px] rounded-full bg-[#2c2f32] flex items-center justify-center">
-            <Image src={profile} alt="profile" height={150} width={150} />
+        {isLoading ? (
+          <Loader />
+        ) : error ? (
+          <div className="text-white text-center p-4 bg-red-500 bg-opacity-20 rounded-md">
+            {error}
           </div>
+        ) : (
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+            {/* Profile Picture */}
+            <div className="w-[120px] h-[120px] rounded-full bg-[#2c2f32] flex items-center justify-center">
+              <Image src={profile} alt="profile" height={120} width={120} />
+            </div>
 
-          {/* User Information */}
-          <div className="flex-1">
-            <h2 className="font-epilogue font-bold text-[24px] text-white">
-              Creator Profile
-            </h2>
-
-            {isLoading ? (
-              <p className="font-epilogue font-normal text-[16px] text-[#808191]">
-                Loading...
-              </p>
-            ) : userData ? (
-              <>
-                <p className="font-epilogue font-normal text-[16px] text-[#808191]">
-                  <span className="text-white">Email: </span>
-                  {userData.email || "Not provided"}
+            {/* User Info */}
+            <div className="flex-1">
+              <h2 className="font-epilogue font-bold text-[24px] text-white">
+                {userData?.role === "CHARITY" ? "Charity" : "Donor"} Profile
+              </h2>
+              {userData?.email && (
+                <p className="mt-1 font-epilogue text-[#808191]">
+                  Email: <span className="text-white">{userData.email}</span>
                 </p>
-                <p className="font-epilogue font-normal text-[16px] text-[#808191] break-all">
-                  <span className="text-white">Wallet Address: </span>
-                  {userData.smartWalletAddress || userAddress}
-                </p>
-                {userData.role && (
-                  <p className="font-epilogue font-normal text-[16px] text-[#808191]">
-                    <span className="text-white">Role: </span>
-                    {userData.role}
-                  </p>
-                )}
-              </>
-            ) : (
-              <p className="font-epilogue font-normal text-[16px] text-[#808191] break-all">
-                {userAddress}
-                {error && (
-                  <span className="text-red-500 block mt-2">{error}</span>
-                )}
+              )}
+              <p className="mt-1 font-epilogue text-[#808191]">
+                Role:{" "}
+                <span className="text-white">{userData?.role || "N/A"}</span>
               </p>
-            )}
+              <p className="mt-1 font-epilogue text-[#808191]">
+                Wallet:{" "}
+                <span className="text-white break-all">{userAddress}</span>
+              </p>
+              <p className="mt-1 font-epilogue text-[#808191]">
+                Total Raised:{" "}
+                <span className="text-white">{donationsTotal} ETH</span>
+              </p>
+            </div>
           </div>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div className="bg-[#1c1c24] rounded-[15px] p-4">
-          <h3 className="font-epilogue font-semibold text-[18px] text-white">
-            {userCampaigns?.length || 0}
-          </h3>
-          <p className="font-epilogue text-[#808191]">Campaigns Created</p>
-        </div>
-
-        <div className="bg-[#1c1c24] rounded-[15px] p-4">
-          <h3 className="font-epilogue font-semibold text-[18px] text-white">
-            {donationsTotal} ETH
-          </h3>
-          <p className="font-epilogue text-[#808191]">Total Raised</p>
-        </div>
+        )}
       </div>
 
       {/* User Campaigns */}
-      {isLoading ? (
-        <Loader />
-      ) : (
-        <DisplayCampaigns
-          title="Created Campaigns"
-          isLoading={false}
-          campaigns={userCampaigns}
-        />
-      )}
+      <div>
+        <h2 className="font-epilogue font-semibold text-[18px] text-white mb-4">
+          {userData?.role === "CHARITY" ? "Campaigns Created" : "Campaigns Supported"}
+        </h2>
+
+        {isLoading && <Loader />}
+
+        {!isLoading && userCampaigns.length === 0 && (
+          <p className="font-epilogue text-[#808191] text-center">
+            No campaigns found
+          </p>
+        )}
+
+        {!isLoading && userCampaigns.length > 0 && (
+          <DisplayCampaigns
+            title="All Campaigns"
+            campaigns={userCampaigns}
+            address={userAddress}
+          />
+        )}
+      </div>
     </div>
   );
 };

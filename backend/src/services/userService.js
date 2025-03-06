@@ -36,11 +36,23 @@ export class UserService {
    */
   static async findByWalletAddress(address) {
     try {
+      console.log(`Finding user by wallet address in service: ${address}`);
+      // Use case-insensitive search for the wallet address
       const user = await prisma.user.findFirst({
         where: { 
-          smartWalletAddress: address 
+          smartWalletAddress: {
+            equals: address,
+            mode: 'insensitive' // Case insensitive search
+          }
         }
       });
+      
+      if (user) {
+        console.log(`Found user with ID: ${user.id}`);
+      } else {
+        console.log('No user found with that wallet address');
+      }
+      
       return user;
     } catch (error) {
       console.error('Error finding user by wallet address:', error);
