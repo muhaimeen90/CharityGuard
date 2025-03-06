@@ -12,7 +12,6 @@ import menu from "./menu.svg";
 import money from "./money.svg";
 //import loader from "./loader.svg";
 import logo2 from "./logo2.png";
-import thirdweb2 from "./thirdweb2.svg";
 import loader from "./loader.svg";
 export {
   tagType,
@@ -28,5 +27,4 @@ export {
   money,
   loader,
   logo2,
-  thirdweb2,
 };

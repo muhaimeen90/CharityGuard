@@ -8,6 +8,8 @@ import DisplayCampaigns from "../components/DisplayCampaigns";
 import ProtectedRoute from "../components/ProtectedRoute";
 import CustomButton from "../components/CustomButton";
 import Loader from "../components/Loader";
+import Image from "next/image";
+import { profile } from "../assets";
 
 const ProfilePage = () => {
   const { data: session } = useSession();
@@ -15,10 +17,14 @@ const ProfilePage = () => {
     address,
     getUserCampaigns,
     userCampaigns,
+    campaignsDonatedTo,
+    donatedCampaigns,
     isLoading: contextLoading,
   } = useStateContext();
   const [isLoading, setIsLoading] = useState(true);
   const [userInfo, setUserInfo] = useState(null);
+  const [usersCampaigns, setUsersCampaigns] = useState([]); // Use state for campaigns
+  const [usersDonatedCampaigns, setUsersDonatedCampaigns] = useState([]); // Use state for donated campaigns
   const router = useRouter();
 
   useEffect(() => {
@@ -37,10 +43,24 @@ const ProfilePage = () => {
 
   useEffect(() => {
     const loadUserCampaigns = async () => {
-      if (address) {
+      if (address && userInfo?.role) {
         setIsLoading(true);
         try {
-          await getUserCampaigns();
+          if (userInfo.role == "CHARITY") {
+            await getUserCampaigns();
+            await campaignsDonatedTo();
+            setUsersDonatedCampaigns(donatedCampaigns || []);
+
+            setUsersCampaigns(userCampaigns || []); // Ensure userCampaigns is not undefined
+          } else if (userInfo.role == "DONOR") {
+            await campaignsDonatedTo();
+            setUsersDonatedCampaigns(donatedCampaigns || []); // Ensure donatedCampaigns is not undefined
+          } else {
+            await getUserCampaigns();
+            await campaignsDonatedTo();
+            setUsersDonatedCampaigns(donatedCampaigns || []);
+            setUsersCampaigns(userCampaigns || []); // Ensure userCampaigns is not undefined
+          }
         } catch (error) {
           console.error("Failed to fetch user campaigns:", error);
         } finally {
@@ -50,9 +70,10 @@ const ProfilePage = () => {
     };
 
     loadUserCampaigns();
-  }, [address]); // Only depend on address to prevent infinite loops
+  }, [address, userInfo]); // Add dependencies
 
-  console.log("User campaigns:", userCampaigns);
+  // console.log("User campaigns:", usersCampaigns);
+  // console.log("user info", userInfo);
 
   return (
     <ProtectedRoute>
@@ -62,11 +83,12 @@ const ProfilePage = () => {
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             {/* Profile Picture */}
             <div className="w-[120px] h-[120px] rounded-full bg-[#2c2f32] flex items-center justify-center">
-              <img
+              {/* <img
                 src="/images/profile.svg"
                 alt="profile"
                 className="w-1/2 h-1/2 object-contain"
-              />
+              /> */}
+              <Image src={profile} alt="profile" height={150} width={150} />
             </div>
 
             {/* User Info */}
@@ -85,14 +107,16 @@ const ProfilePage = () => {
                 </span>
               </p>
 
-              <div className="mt-4 flex flex-wrap gap-3">
-                <CustomButton
-                  btnType="button"
-                  title="Create Campaign"
-                  styles="bg-[#8c6dfd] hover:bg-[#7b5de8]"
-                  handleClick={() => router.push("/create-campaign")}
-                />
-              </div>
+              {userInfo?.role !== "DONOR" && (
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <CustomButton
+                    btnType="button"
+                    title="Create Campaign"
+                    styles="bg-[#8c6dfd] hover:bg-[#7b5de8]"
+                    handleClick={() => router.push("/create-campaign")}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -108,7 +132,7 @@ const ProfilePage = () => {
 
           <div className="bg-[#1c1c24] rounded-[15px] p-4">
             <h3 className="font-epilogue font-semibold text-[18px] text-white">
-              0
+              {usersDonatedCampaigns?.length || 0}
             </h3>
             <p className="font-epilogue text-[#808191]">Campaigns Funded</p>
           </div>
@@ -125,10 +149,21 @@ const ProfilePage = () => {
         {isLoading || contextLoading ? (
           <Loader />
         ) : (
+          userInfo?.role !== "DONOR" && (
+            <DisplayCampaigns
+              title="Your Campaigns"
+              isLoading={false}
+              campaigns={usersCampaigns}
+            />
+          )
+        )}
+        {isLoading || contextLoading ? (
+          <Loader />
+        ) : (
           <DisplayCampaigns
-            title="Your Campaigns"
+            title="Your Donated Campaigns"
             isLoading={false}
-            campaigns={userCampaigns}
+            campaigns={usersDonatedCampaigns}
           />
         )}
       </div>

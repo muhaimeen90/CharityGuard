@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useStateContext } from "../context/Campaign";
 import { navlinks } from "../constants";
-import { search, menu } from "../assets";
+import { search, profile } from "../assets";
 import NotificationBell from "./NotificationBell";
 import Image from "next/image";
 
@@ -70,11 +70,7 @@ const Navbar = () => {
 
         <Link href="/profile">
           <div className="w-[52px] h-[52px] rounded-full bg-[#2c2f32] flex justify-center items-center cursor-pointer">
-            <img
-              src="/images/profile.svg"
-              alt="user"
-              className="w-[60%] h-[60%] object-contain"
-            />
+            <Image src={profile} alt="profile" height={150} width={150} />
           </div>
         </Link>
       </div>
