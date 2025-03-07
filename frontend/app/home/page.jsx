@@ -26,6 +26,11 @@ export default function HomePage() {
   }, []);
 
   //const activeCampaigns = campaigns.filter((campaign) => campaign.isActive);
+  const sortedCampaigns = [...campaigns].sort((a, b) => {
+    if (b.id > a.id) return 1; // b comes first
+    if (b.id < a.id) return -1; // a comes first
+    return 0; // no change
+  });
 
   return (
     <ProtectedRoute>
@@ -33,7 +38,7 @@ export default function HomePage() {
         title="All Campaigns"
         isLoading={isLoading}
         //campaigns={activeCampaigns}
-        campaigns={campaigns}
+        campaigns={sortedCampaigns}
       />
     </ProtectedRoute>
   );
