@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,9 +14,66 @@ const Navbar = () => {
   const { data: session, status } = useSession();
   const { connect, address } = useStateContext();
   const router = useRouter();
-
+  const [userData, setUserData] = useState(null);
+  const [userInfo, setUserInfo] = useState(null);
   const [isActive, setIsActive] = useState("dashboard");
   const [toggleDrawer, setToggleDrawer] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // useEffect(() => {
+  //   const fetchUserInfo = async () => {
+  //     if (session?.user) {
+  //       console.log("session user data:", session.user); // Check session user data
+  //       setUserInfo({
+  //         id: session.user.id,
+  //         email: session.user.email,
+  //         role: session.user.role || "USER",
+  //       });
+  //     }
+  //   };
+
+  //   fetchUserInfo();
+  // }, [session]);
+
+  // useEffect(() => {
+  //   console.log("User Info", userInfo);
+  // }, [userInfo]);
+
+  // //console.log("User Info", userInfo?.email);
+
+  // useEffect(() => {
+  //   const fetchUserData = async () => {
+  //     if (!userInfo?.email) {
+  //       console.log("User Info", userInfo?.email);
+
+  //       return;
+  //     }
+  //     console.log("User Info", userInfo?.email);
+  //     setIsLoading(true);
+  //     try {
+  //       console.log(`Fetching user data for address: ${userInfo?.email}`);
+  //       const response = await fetch(`/api/users/email/${userInfo?.email}`);
+
+  //       if (!response.ok) {
+  //         const errorData = await response.json();
+  //         console.error("Error response:", errorData);
+  //         throw new Error(errorData.error || "Failed to fetch user data");
+  //       }
+
+  //       const data = await response.json();
+  //       console.log("User data fetched:", data);
+  //       setUserData(data);
+  //     } catch (err) {
+  //       console.error("Error fetching user data:", err);
+  //       setError(err.message || "Failed to load user information");
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+  //   fetchUserData();
+  // }, [userInfo?.email]);
 
   const handleLogout = async () => {
     await signOut({ redirect: false });
