@@ -17,7 +17,6 @@ const UserProfilePage = () => {
     fetchCampaigns,
     campaignsDonatedTo,
     donatedCampaigns,
-    getCampaignsByOwner,
     isLoading: contextLoading,
   } = useStateContext();
   const [userCampaigns, setUserCampaigns] = useState([]);
@@ -26,10 +25,10 @@ const UserProfilePage = () => {
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState(null);
   const { data: session } = useSession();
-  //const [usersCampaigns, setUsersCampaigns] = useState([]); // Use state for campaigns
-  const [usersDonatedCampaigns, setUsersDonatedCampaigns] = useState([]); // Use state for donated campaigns
+  const [usersDonatedCampaigns, setUsersDonatedCampaigns] = useState([]);
+  const [showCreated, setShowCreated] = useState(false);
+  const [showDonated, setShowDonated] = useState(false);
 
-  // Fetch user data from backend
   useEffect(() => {
     const fetchUserData = async () => {
       if (!userAddress) return;
@@ -37,7 +36,6 @@ const UserProfilePage = () => {
       setIsLoading(true);
       try {
         console.log(`Fetching user data for address: ${userAddress}`);
-        // Use the Next.js API route
         const response = await fetch(`/api/users/address/${userAddress}`);
 
         if (!response.ok) {
@@ -60,105 +58,56 @@ const UserProfilePage = () => {
     fetchUserData();
   }, [userAddress]);
 
-  useEffect(() => {
-    const loadUserCampaigns = async () => {
-      setIsLoading(true);
-      try {
-        if (userData?.role === "CHARITY" || userData?.role === "FUNDRAISER") {
-          console.log("User is a charity or fundraiser");
-          const filteredCampaigns = campaigns.filter(
-            (campaign) =>
-              campaign[5]?.toLowerCase() == userAddress?.toLowerCase()
-          );
-          setUserCampaigns(filteredCampaigns);
-        }
+  const handleShowCreated = async () => {
+    setIsLoading(true);
+    try {
+      if (userData?.role === "CHARITY" || userData?.role === "FUNDRAISER") {
+        const filteredCampaigns = campaigns.filter(
+          (campaign) =>
+            campaign[5]?.toLowerCase() === userAddress?.toLowerCase()
+        );
+        setUserCampaigns(filteredCampaigns);
+      }
+      setShowCreated(true);
+      setShowDonated(false);
+    } catch (error) {
+      console.error("Failed to load user campaigns:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        // Fetch donated campaigns for all users
-
-        // Fetch if userData is available
-        console.log("Fetching donated campaigns for:", userAddress);
-        await campaignsDonatedTo(userAddress);
-        setUsersDonatedCampaigns(donatedCampaigns);
-        console.log("userscamp", usersDonatedCampaigns); // Update state after fetching
-        console.log("donatedCampaigns", donatedCampaigns);
-
-        let total = 0;
+  const handleShowDonated = async () => {
+    setIsLoading(true);
+    try {
+      console.log("Fetching donated campaigns for:", userAddress);
+      await campaignsDonatedTo(userAddress);
+      setUsersDonatedCampaigns(donatedCampaigns);
+      setShowDonated(true);
+      setShowCreated(false);
+      let total = 0;
+      if (userCampaigns) {
         userCampaigns.forEach((campaign) => {
           if (campaign[4]) {
-            // campaign[4] contains the raised amount
             total += Number(ethers.formatEther(campaign[4].toString()));
           }
         });
-
-        setDonationsTotal(total.toFixed(2));
-      } catch (error) {
-        console.error("Failed to load user campaigns:", error);
-      } finally {
-        setIsLoading(false);
       }
-    };
 
-    if (userAddress && userData) {
-      // Load only when both are available
-      loadUserCampaigns();
+      setDonationsTotal(total.toFixed(2));
+    } catch (error) {
+      console.error("Failed to load donated campaigns:", error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [userAddress, userData, isLoading]); // Dependency on userData
-
-  // Fetch user campaigns
-  // useEffect(() => {
-  //   const loadUserCampaigns = async () => {
-  //     try {
-  //       if (campaigns.length === 0) {
-  //         await fetchCampaigns();
-  //       }
-  //       //let filteredCampaigns = [];
-  //       if (userData?.role == "CHARITY" || userData?.role == "FUNDRAISER") {
-  //         console.log("User is a charity or fundraiser");
-  //         const filteredCampaigns = campaigns.filter(
-  //           (campaign) =>
-  //             campaign[5]?.toLowerCase() == userAddress?.toLowerCase()
-  //         );
-
-  //         setUserCampaigns(filteredCampaigns);
-  //         await campaignsDonatedTo(userAddress);
-  //         //setUsersDonatedCampaigns(donatedCampaigns || []);
-  //       } else if (userData?.role == "DONOR") {
-  //         console.log("User is a donor");
-  //         await campaignsDonatedTo(userAddress);
-  //       }
-
-  //       //setUserCampaigns(donatedCampaigns);
-  //       //console.log("Donated campaigns:");
-  //       //setUsersDonatedCampaigns(donatedCampaigns);
-  //       // Calculate total donations
-  //       let total = 0;
-  //       userCampaigns.forEach((campaign) => {
-  //         if (campaign[4]) {
-  //           // campaign[4] contains the raised amount
-  //           total += Number(ethers.formatEther(campaign[4].toString()));
-  //         }
-  //       });
-
-  //       setDonationsTotal(total.toFixed(2));
-  //     } catch (error) {
-  //       console.error("Failed to load user campaigns:", error);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-
-  //   if (userAddress) {
-  //     loadUserCampaigns();
-  //   }
-  // }, [userAddress, userData, campaigns]);
+  };
 
   console.log("User campaigns:", userCampaigns);
   console.log("Donated campaigns:", donatedCampaigns);
   console.log("User data:", userData);
 
   return (
-    <div className="flex flex-col">
-      {/* User Profile Card */}
+    <div className="flex flex-col p-6 bg-[#13131a] min-h-screen">
       <div className="bg-[#1c1c24] rounded-[20px] p-6 mb-8">
         {isLoading ? (
           <Loader />
@@ -168,12 +117,9 @@ const UserProfilePage = () => {
           </div>
         ) : (
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-            {/* Profile Picture */}
             <div className="w-[120px] h-[120px] rounded-full bg-[#2c2f32] flex items-center justify-center">
               <Image src={profile} alt="profile" height={120} width={120} />
             </div>
-
-            {/* User Info */}
             <div className="flex-1">
               <h2 className="font-epilogue font-bold text-[24px] text-white">
                 {userData?.role === "CHARITY" ? "Charity" : "Donor"} Profile
@@ -200,23 +146,33 @@ const UserProfilePage = () => {
         )}
       </div>
 
-      {/* User Campaigns */}
-      <div>
-        {/* <h2 className="font-epilogue font-semibold text-[18px] text-white mb-4">
-          {userData?.role === "CHARITY"
-            ? "Campaigns Created"
-            : "Campaigns Supported"}
-        </h2> */}
+      <div className="flex justify-center gap-4 mb-8">
+        {(userData?.role === "CHARITY" || userData?.role === "FUNDRAISER") && (
+          <button
+            className="font-epilogue font-semibold text-[16px] text-white min-h-[52px] px-6 rounded-full bg-[#1dc071] hover:bg-[#14a85d] transition-all"
+            onClick={handleShowCreated}
+          >
+            Created Campaigns
+          </button>
+        )}
+        <button
+          className="font-epilogue font-semibold text-[16px] text-white min-h-[52px] px-6 rounded-full bg-[#8c6dfd] hover:bg-[#7b5de8] transition-all"
+          onClick={handleShowDonated}
+        >
+          Donated Campaigns
+        </button>
+      </div>
 
+      <div>
         {isLoading && <Loader />}
 
-        {!isLoading && userCampaigns.length === 0 && (
+        {showCreated && !isLoading && userCampaigns.length === 0 && (
           <p className="font-epilogue text-[#808191] text-center">
-            No campaigns found
+            No created campaigns found
           </p>
         )}
 
-        {!isLoading && userCampaigns.length > 0 && (
+        {showCreated && !isLoading && userCampaigns.length > 0 && (
           <DisplayCampaigns
             title="Campaigns Created"
             campaigns={userCampaigns}
@@ -224,7 +180,13 @@ const UserProfilePage = () => {
           />
         )}
 
-        {!isLoading && userCampaigns.length > 0 && (
+        {showDonated && !isLoading && usersDonatedCampaigns.length === 0 && (
+          <p className="font-epilogue text-[#808191] text-center">
+            No donated campaigns found
+          </p>
+        )}
+
+        {showDonated && !isLoading && usersDonatedCampaigns.length > 0 && (
           <DisplayCampaigns
             title="Campaigns Supported"
             campaigns={usersDonatedCampaigns}
