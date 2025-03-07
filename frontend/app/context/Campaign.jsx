@@ -64,7 +64,7 @@ export const StateContextProvider = ({ children }) => {
         const signer = await provider.getSigner();
 
         const contractInstance = new ethers.Contract(
-          "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
+          "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
           CampaignFactoryABI.abi,
           signer
         );
@@ -96,7 +96,7 @@ export const StateContextProvider = ({ children }) => {
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
         //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-        "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
+        "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
         CampaignFactoryABI.abi,
         signer
       );
@@ -125,7 +125,7 @@ export const StateContextProvider = ({ children }) => {
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
         //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-        "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
+        "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
         CampaignFactoryABI.abi,
         signer
       );
@@ -154,7 +154,7 @@ export const StateContextProvider = ({ children }) => {
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
         //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-        "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
+        "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
         CampaignFactoryABI.abi,
         signer
       );
@@ -196,7 +196,7 @@ export const StateContextProvider = ({ children }) => {
           const signer = await provider.getSigner();
 
           const contractInstance = new ethers.Contract(
-            "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
+            "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
             CampaignFactoryABI.abi,
             signer
           );
@@ -248,7 +248,7 @@ export const StateContextProvider = ({ children }) => {
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
         //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-        "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
+        "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
         CampaignFactoryABI.abi,
         signer
       );
@@ -281,7 +281,7 @@ export const StateContextProvider = ({ children }) => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
-        "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
+        "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
         CampaignFactoryABI.abi,
         signer
       );
@@ -322,7 +322,7 @@ export const StateContextProvider = ({ children }) => {
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
         //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-        "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
+        "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
         CampaignFactoryABI.abi,
         signer
       );
@@ -377,7 +377,7 @@ export const StateContextProvider = ({ children }) => {
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
         //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-        "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
+        "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
         CampaignFactoryABI.abi,
         signer
       );
@@ -414,7 +414,7 @@ export const StateContextProvider = ({ children }) => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
-        "0x24aF9c16859b32b5719B7Fc6b39815030B9b5621",
+        "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
         CampaignFactoryABI.abi,
         signer
       );

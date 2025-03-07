@@ -51,7 +51,7 @@ export default function Home() {
 
       <div className="w-full flex justify-center items-center p-4 bg-[#3a3a43] rounded-[10px] mt-12 max-w-[800px]">
         <img
-          src="/money.png" // Replace with your image path
+          src="/money.png"
           alt="money"
           className="w-[60px] h-[60px] object-contain"
         />

@@ -52,6 +52,8 @@ const UserProfilePage = () => {
       } catch (err) {
         console.error("Error fetching user data:", err);
         setError(err.message || "Failed to load user information");
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -60,6 +62,7 @@ const UserProfilePage = () => {
 
   useEffect(() => {
     const loadUserCampaigns = async () => {
+      setIsLoading(true);
       try {
         if (userData?.role === "CHARITY" || userData?.role === "FUNDRAISER") {
           console.log("User is a charity or fundraiser");
@@ -99,7 +102,7 @@ const UserProfilePage = () => {
       // Load only when both are available
       loadUserCampaigns();
     }
-  }, [userAddress, userData]); // Dependency on userData
+  }, [userAddress, userData, isLoading]); // Dependency on userData
 
   // Fetch user campaigns
   // useEffect(() => {

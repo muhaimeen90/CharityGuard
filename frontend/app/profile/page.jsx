@@ -71,7 +71,7 @@ const ProfilePage = () => {
     };
 
     loadUserCampaigns();
-  }, [address, userInfo]); // Add dependencies
+  }, [address, userInfo, isLoading]); // Add dependencies
 
   // console.log("User campaigns:", usersCampaigns);
   // console.log("user info", userInfo);

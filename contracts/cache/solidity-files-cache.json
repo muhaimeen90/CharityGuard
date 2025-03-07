@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "E:\\SPL2\\gg\\CharityGuard\\contracts\\contracts\\Lock.sol": {
-      "lastModificationDate": 1741200570907,
-      "contentHash": "4f3cabaea69acbea63cf4032d9c3781e",
+      "lastModificationDate": 1741339845742,
+      "contentHash": "154b6fc05cc38ed6913a90e8fc529c03",
       "sourceName": "contracts/Lock.sol",
       "solcConfig": {
         "version": "0.8.19",

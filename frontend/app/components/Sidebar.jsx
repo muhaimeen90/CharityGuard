@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -38,19 +38,29 @@ const Sidebar = () => {
   const { data: session } = useSession();
   const { address } = useStateContext();
   const [isActive, setIsActive] = useState("home");
-
+  const [userInfo, setUserInfo] = useState(null);
   // Define navlinks directly here instead of importing from constants
   // This way we exclude the logout option
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      if (session?.user) {
+        setUserInfo({
+          id: session.user.id,
+          email: session.user.email,
+          role: session.user.role || "USER",
+        });
+      }
+    };
+
+    fetchUserInfo();
+  }, [session]);
+
   const sidebarLinks = [
     {
       name: "home",
       imgUrl: home,
       link: "/home",
-    },
-    {
-      name: "campaign",
-      imgUrl: createCampaign,
-      link: "/create-campaign",
     },
     {
       name: "notifications",
@@ -63,6 +73,15 @@ const Sidebar = () => {
       link: "/profile",
     },
   ];
+
+  // Add "Create Campaign" link only if the user is not a DONOR
+  if (userInfo?.role !== "DONOR") {
+    sidebarLinks.splice(1, 0, {
+      name: "campaign",
+      imgUrl: createCampaign,
+      link: "/create-campaign",
+    });
+  }
 
   return (
     <div className="flex justify-between items-center flex-col sticky top-5 h-[93vh]">

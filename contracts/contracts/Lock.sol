@@ -19,12 +19,14 @@ contract DonationPlatform {
     struct Donor {
         address donorAddress;
         uint256 amount;
+        bytes32 txHash; // Add transaction hash for donations
     }
 
     struct Recipient {
-    address recipientAddress;
-    uint256 amount;
-}
+        address recipientAddress;
+        uint256 amount;
+        bytes32 txHash; // Add transaction hash for disbursements
+    }
 
     uint256 public campaignCount;
     mapping(uint256 => Campaign) public campaigns;
@@ -34,8 +36,8 @@ contract DonationPlatform {
     mapping(uint256 => Recipient[]) public campaignRecipients;
 
     event CampaignCreated(uint256 id, string title, string description, uint256 goal, address owner, uint256 deadline, string image);
-    event DonationMade(uint256 campaignId, address donor, uint256 amount);
-    event FundsDistributed(uint256 campaignId, address[] recipients, uint256[] amounts);
+     event DonationMade(uint256 campaignId, address donor, uint256 amount, bytes32 txHash); 
+    event FundsDistributed(uint256 campaignId, address[] recipients, uint256[] amounts, bytes32[] txHashes); 
 
     function createCampaign(
         string memory _title,
@@ -66,25 +68,30 @@ contract DonationPlatform {
     }
 
     function donate(uint256 _campaignId) public payable {
-    require(_campaignId > 0 && _campaignId <= campaignCount, "Invalid campaign ID");
-    Campaign storage campaign = campaigns[_campaignId];
-    require(campaign.isActive, "Campaign is not active");
+        require(_campaignId > 0 && _campaignId <= campaignCount, "Invalid campaign ID");
+        Campaign storage campaign = campaigns[_campaignId];
+        require(campaign.isActive, "Campaign is not active");
 
-    campaign.raised += msg.value;
+        campaign.raised += msg.value;
 
-    campaignDonors[_campaignId].push(Donor({
-        donorAddress: msg.sender,
-        amount: msg.value
-    }));
+        // Get the transaction hash
+        bytes32 txHash = blockhash(block.number - 1);
 
-    userDonations[msg.sender].push(_campaignId);
+        // Store the donation with the transaction hash
+        campaignDonors[_campaignId].push(Donor({
+            donorAddress: msg.sender,
+            amount: msg.value,
+            txHash: txHash
+        }));
 
-    emit DonationMade(_campaignId, msg.sender, msg.value);
+        userDonations[msg.sender].push(_campaignId);
 
-    if (campaign.raised >= campaign.goal || block.timestamp >= campaign.deadline) {
-        distributeFunds(_campaignId);
+        emit DonationMade(_campaignId, msg.sender, msg.value, txHash);
+
+        if (campaign.raised >= campaign.goal || block.timestamp >= campaign.deadline) {
+            distributeFunds(_campaignId);
+        }
     }
-}
 
 function distributeFunds(uint256 _campaignId) internal {
     Campaign storage campaign = campaigns[_campaignId];
@@ -103,6 +110,8 @@ function distributeFunds(uint256 _campaignId) internal {
     console.log("Recipient count:", recipientCount);
 
     uint256[] memory amounts = new uint256[](recipientCount);
+    bytes32[] memory txHashes = new bytes32[](recipientCount); // Array to store transaction hashes
+
     for (uint256 i = 0; i < recipientCount; i++) {
         amounts[i] = amountPerRecipient;
         if (remainder > 0) {
@@ -110,11 +119,16 @@ function distributeFunds(uint256 _campaignId) internal {
             remainder--;
         }
 
-        // Store the recipient and their amount in the mapping
-        campaignRecipients[_campaignId].push(Recipient({
-            recipientAddress: campaign.recipients[i],
-            amount: amounts[i]
-        }));
+       bytes32 txHash = blockhash(block.number - 1);
+
+            // Store the recipient, amount, and transaction hash
+            campaignRecipients[_campaignId].push(Recipient({
+                recipientAddress: campaign.recipients[i],
+                amount: amounts[i],
+                txHash: txHash
+            }));
+
+            txHashes[i] = txHash; 
 
         console.log("Sending to recipient:", campaign.recipients[i]);
         console.log("Amount:", amounts[i]);
@@ -124,7 +138,7 @@ function distributeFunds(uint256 _campaignId) internal {
         require(sent, "Failed to send Ether to recipient");
     }
 
-    emit FundsDistributed(_campaignId, campaign.recipients, amounts);
+    emit FundsDistributed(_campaignId, campaign.recipients, amounts, txHashes);
 }
 
 
