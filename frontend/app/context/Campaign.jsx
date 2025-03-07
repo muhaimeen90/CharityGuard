@@ -183,32 +183,32 @@ export const StateContextProvider = ({ children }) => {
 
     window.ethereum.on("accountsChanged", handleAccountsChanged);
 
-    // Check if already connected
-    const checkConnection = async () => {
-      try {
-        const accounts = await window.ethereum.request({
-          method: "eth_accounts",
-        });
-        if (accounts.length > 0) {
-          setAddress(accounts[0]);
+    //   // Check if already connected
+    //   const checkConnection = async () => {
+    //     try {
+    //       const accounts = await window.ethereum.request({
+    //         method: "eth_accounts",
+    //       });
+    //       if (accounts.length > 0) {
+    //         setAddress(accounts[0]);
 
-          const provider = new ethers.BrowserProvider(window.ethereum);
-          const signer = await provider.getSigner();
+    //         const provider = new ethers.BrowserProvider(window.ethereum);
+    //         const signer = await provider.getSigner();
 
-          const contractInstance = new ethers.Contract(
-            "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
-            CampaignFactoryABI.abi,
-            signer
-          );
+    //         const contractInstance = new ethers.Contract(
+    //           "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
+    //           CampaignFactoryABI.abi,
+    //           signer
+    //         );
 
-          setContract(contractInstance);
-        }
-      } catch (error) {
-        console.error("Error checking connection:", error);
-      }
-    };
+    //         setContract(contractInstance);
+    //       }
+    //     } catch (error) {
+    //       console.error("Error checking connection:", error);
+    //     }
+    //   };
 
-    checkConnection();
+    //checkConnection();
 
     return () => {
       window.ethereum.removeListener("accountsChanged", handleAccountsChanged);

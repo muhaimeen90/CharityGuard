@@ -2,22 +2,38 @@
 
 import { useRouter } from "next/navigation";
 import CustomButton from "./components/CustomButton";
-//import { useStateContext } from "./context/Campaign"; // Adjust the import path as necessary
+import React, { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 
 export default function Home() {
   const router = useRouter();
-  //const { address } = useStateContext(); // Assuming address is used to check if the user is logged in
+  const [userInfo, setUserInfo] = useState(null);
+  const { data: session } = useSession();
 
-  // const handleExploreClick = () => {
-  //   if (address) {
-  //     router.push("/home");
-  //   } else {
-  //     router.push("/unAuthHome");
-  //   }
-  // };
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      if (session?.user) {
+        setUserInfo({
+          id: session.user.id,
+          email: session.user.email,
+          role: session.user.role || "USER",
+        });
+      }
+    };
+
+    fetchUserInfo();
+  }, [session]);
+
+  useEffect(() => {
+    if (userInfo) {
+      // Only redirect if userInfo is available.
+      router.push("/home");
+    }
+  }, [userInfo, router]); // Add userInfo and router as dependencies.
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen p-4 rounded-[10px] bg-[#13131a]">
+      {/* ... (rest of your component remains the same) */}
       <div className="flex flex-col items-center text-center">
         <h1 className="font-epilogue font-bold sm:text-[50px] text-[40px] leading-[60px] text-white">
           CharityGuard
@@ -40,12 +56,6 @@ export default function Home() {
             styles="bg-[#8c6dfd] hover:bg-[#7b5de8] transition-all"
             handleClick={() => router.push("/register")}
           />
-          {/* <CustomButton
-            btnType="button"
-            title="Explore Campaigns"
-            styles="bg-[#4e4e57] hover:bg-[#3a3a43] transition-all"
-            handleClick={handleExploreClick}
-          /> */}
         </div>
       </div>
 
@@ -61,6 +71,7 @@ export default function Home() {
       </div>
 
       <div className="flex flex-col sm:flex-row justify-center items-center gap-8 mt-12">
+        {/* ... (rest of your component remains the same) */}
         <div className="bg-[#3a3a43] p-6 rounded-[10px] max-w-[300px]">
           <h3 className="font-epilogue font-bold text-[22px] text-white">
             Transparency

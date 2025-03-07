@@ -8,9 +8,7 @@ export default function Providers({ children }) {
   return (
     <SessionProvider>
       <StateContextProvider>
-        <NotificationProvider>
-          {children}
-        </NotificationProvider>
+        <NotificationProvider>{children}</NotificationProvider>
       </StateContextProvider>
     </SessionProvider>
   );

@@ -10,23 +10,23 @@ import CustomButton from "../components/CustomButton";
 import Loader from "../components/Loader";
 import Image from "next/image";
 import { profile } from "../assets";
-import { add } from "date-fns";
 
 const ProfilePage = () => {
   const { data: session } = useSession();
   const {
     address,
     getUserCampaigns,
-    userCampaigns,
     campaignsDonatedTo,
-    donatedCampaigns,
     isLoading: contextLoading,
   } = useStateContext();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
-  const [usersCampaigns, setUsersCampaigns] = useState([]); // Use state for campaigns
-  const [usersDonatedCampaigns, setUsersDonatedCampaigns] = useState([]); // Use state for donated campaigns
+  const [usersCampaigns, setUsersCampaigns] = useState([]);
+  const [usersDonatedCampaigns, setUsersDonatedCampaigns] = useState([]);
   const router = useRouter();
+  const [showCreated, setShowCreated] = useState(false);
+  const [showDonated, setShowDonated] = useState(false);
+  const [donationsTotal, setDonationsTotal] = useState(0);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -42,39 +42,62 @@ const ProfilePage = () => {
     fetchUserInfo();
   }, [session]);
 
-  useEffect(() => {
-    const loadUserCampaigns = async () => {
-      if (address && userInfo?.role) {
-        setIsLoading(true);
-        try {
-          if (userInfo.role == "CHARITY") {
-            await getUserCampaigns();
-            await campaignsDonatedTo(address);
-            setUsersDonatedCampaigns(donatedCampaigns || []);
+  const handleShowCreated = async () => {
+    setIsLoading(true);
+    try {
+      if (address && userInfo?.role && userInfo.role !== "DONOR") {
+        const fetchedCampaigns = await getUserCampaigns();
+        const uniqueCampaigns = filterUniqueCampaigns(fetchedCampaigns);
 
-            setUsersCampaigns(userCampaigns || []); // Ensure userCampaigns is not undefined
-          } else if (userInfo.role == "DONOR") {
-            await campaignsDonatedTo(address);
-            setUsersDonatedCampaigns(donatedCampaigns || []); // Ensure donatedCampaigns is not undefined
-          } else {
-            await getUserCampaigns();
-            await campaignsDonatedTo(address);
-            setUsersDonatedCampaigns(donatedCampaigns || []);
-            setUsersCampaigns(userCampaigns || []); // Ensure userCampaigns is not undefined
-          }
-        } catch (error) {
-          console.error("Failed to fetch user campaigns:", error);
-        } finally {
-          setIsLoading(false);
-        }
+        setUsersCampaigns(uniqueCampaigns || []);
       }
-    };
+      setShowCreated(true);
+      setShowDonated(false);
+    } catch (error) {
+      console.error("Failed to load user campaigns:", error);
+      setUsersCampaigns([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    loadUserCampaigns();
-  }, [address, userInfo, isLoading]); // Add dependencies
+  const handleShowDonated = async () => {
+    setIsLoading(true);
+    try {
+      if (address) {
+        const fetchedDonatedCampaigns = await campaignsDonatedTo(address);
 
-  // console.log("User campaigns:", usersCampaigns);
-  // console.log("user info", userInfo);
+        const uniqueCampaigns = filterUniqueCampaigns(fetchedDonatedCampaigns);
+
+        setUsersDonatedCampaigns(uniqueCampaigns || []);
+      }
+      setShowDonated(true);
+      setShowCreated(false);
+      let total = 0;
+
+      setDonationsTotal(total.toFixed(2));
+    } catch (error) {
+      console.error("Failed to load donated campaigns:", error);
+      setUsersDonatedCampaigns([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filterUniqueCampaigns = (campaigns) => {
+    const uniqueCampaigns = [];
+    const seenCampaigns = new Set();
+
+    campaigns.forEach((campaign) => {
+      const campaignId = campaign[0];
+      if (!seenCampaigns.has(campaignId)) {
+        seenCampaigns.add(campaignId);
+        uniqueCampaigns.push(campaign);
+      }
+    });
+
+    return uniqueCampaigns;
+  };
 
   return (
     <ProtectedRoute>
@@ -82,17 +105,9 @@ const ProfilePage = () => {
         {/* User Profile Card */}
         <div className="bg-[#1c1c24] rounded-[20px] p-6 mb-8">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-            {/* Profile Picture */}
             <div className="w-[120px] h-[120px] rounded-full bg-[#2c2f32] flex items-center justify-center">
-              {/* <img
-                src="/images/profile.svg"
-                alt="profile"
-                className="w-1/2 h-1/2 object-contain"
-              /> */}
               <Image src={profile} alt="profile" height={150} width={150} />
             </div>
-
-            {/* User Info */}
             <div className="flex-1">
               <h2 className="font-epilogue font-bold text-[24px] text-white">
                 {userInfo?.email || "User"}
@@ -107,7 +122,6 @@ const ProfilePage = () => {
                   {address || "Not connected"}
                 </span>
               </p>
-
               {userInfo?.role !== "DONOR" && (
                 <div className="mt-4 flex flex-wrap gap-3">
                   <CustomButton
@@ -123,49 +137,66 @@ const ProfilePage = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-[#1c1c24] rounded-[15px] p-4">
-            <h3 className="font-epilogue font-semibold text-[18px] text-white">
-              {userCampaigns?.length || 0}
-            </h3>
-            <p className="font-epilogue text-[#808191]">Campaigns Created</p>
-          </div>
-
+        {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          {userInfo?.role !== "DONOR" && (
+            <div className="bg-[#1c1c24] rounded-[15px] p-4">
+              <h3 className="font-epilogue font-semibold text-[18px] text-white">
+                {usersCampaigns?.length || 0}
+              </h3>
+              <p className="font-epilogue text-[#808191]">Campaigns Created</p>
+            </div>
+          )}
           <div className="bg-[#1c1c24] rounded-[15px] p-4">
             <h3 className="font-epilogue font-semibold text-[18px] text-white">
               {usersDonatedCampaigns?.length || 0}
             </h3>
             <p className="font-epilogue text-[#808191]">Campaigns Funded</p>
           </div>
-
           <div className="bg-[#1c1c24] rounded-[15px] p-4">
-            <h3 className="font-epilogue font-semibold text-[18px] text-white">
-              0 ETH
-            </h3>
+            
+            <h3 className="font-epilogue font-semibold text-[18px] text-white">{donationsTotal} ETH</h3>
             <p className="font-epilogue text-[#808191]">Total Donations</p>
           </div>
+        </div> */}
+
+        {/* Buttons to show created/donated campaigns */}
+        <div className="flex justify-center gap-4 mb-8">
+          {userInfo?.role !== "DONOR" && (
+            <button
+              className="font-epilogue font-semibold text-[16px] text-white min-h-[52px] px-6 rounded-full bg-[#1dc071] hover:bg-[#14a85d] transition-all"
+              onClick={handleShowCreated}
+            >
+              Created Campaigns
+            </button>
+          )}
+          <button
+            className="font-epilogue font-semibold text-[16px] text-white min-h-[52px] px-6 rounded-full bg-[#8c6dfd] hover:bg-[#7b5de8] transition-all"
+            onClick={handleShowDonated}
+          >
+            Donated Campaigns
+          </button>
         </div>
 
         {/* User Campaigns */}
         {isLoading || contextLoading ? (
           <Loader />
         ) : (
-          userInfo?.role !== "DONOR" && (
-            <DisplayCampaigns
-              title="Your Campaigns"
-              isLoading={false}
-              campaigns={usersCampaigns}
-            />
-          )
-        )}
-        {isLoading || contextLoading ? (
-          <Loader />
-        ) : (
-          <DisplayCampaigns
-            title="Your Donated Campaigns"
-            isLoading={false}
-            campaigns={usersDonatedCampaigns}
-          />
+          <>
+            {showCreated && (
+              <DisplayCampaigns
+                title="Your Campaigns"
+                isLoading={false}
+                campaigns={usersCampaigns}
+              />
+            )}
+            {showDonated && (
+              <DisplayCampaigns
+                title="Your Donated Campaigns"
+                isLoading={false}
+                campaigns={usersDonatedCampaigns}
+              />
+            )}
+          </>
         )}
       </div>
     </ProtectedRoute>

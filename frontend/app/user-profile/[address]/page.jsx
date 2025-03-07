@@ -66,10 +66,23 @@ const UserProfilePage = () => {
           (campaign) =>
             campaign[5]?.toLowerCase() === userAddress?.toLowerCase()
         );
-        setUserCampaigns(filteredCampaigns);
+        const uniqueCampaigns = filterUniqueCampaigns(filteredCampaigns);
+
+        setUserCampaigns(uniqueCampaigns);
       }
       setShowCreated(true);
       setShowDonated(false);
+      let total = 0;
+      if (userCampaigns) {
+        userCampaigns.forEach((campaign) => {
+          if (campaign[4]) {
+            total += Number(ethers.formatEther(campaign[4].toString()));
+          }
+        });
+      }
+
+      setDonationsTotal(total.toFixed(2));
+      console.log("Total donations:", donationsTotal);
     } catch (error) {
       console.error("Failed to load user campaigns:", error);
     } finally {
@@ -82,24 +95,31 @@ const UserProfilePage = () => {
     try {
       console.log("Fetching donated campaigns for:", userAddress);
       await campaignsDonatedTo(userAddress);
-      setUsersDonatedCampaigns(donatedCampaigns);
+      const uniqueCampaigns = filterUniqueCampaigns(donatedCampaigns);
+
+      setUsersDonatedCampaigns(uniqueCampaigns);
       setShowDonated(true);
       setShowCreated(false);
-      let total = 0;
-      if (userCampaigns) {
-        userCampaigns.forEach((campaign) => {
-          if (campaign[4]) {
-            total += Number(ethers.formatEther(campaign[4].toString()));
-          }
-        });
-      }
-
-      setDonationsTotal(total.toFixed(2));
     } catch (error) {
       console.error("Failed to load donated campaigns:", error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const filterUniqueCampaigns = (campaigns) => {
+    const uniqueCampaigns = [];
+    const seenCampaigns = new Set();
+
+    campaigns.forEach((campaign) => {
+      const campaignId = campaign[0];
+      if (!seenCampaigns.has(campaignId)) {
+        seenCampaigns.add(campaignId);
+        uniqueCampaigns.push(campaign);
+      }
+    });
+
+    return uniqueCampaigns;
   };
 
   console.log("User campaigns:", userCampaigns);
@@ -137,10 +157,12 @@ const UserProfilePage = () => {
                 Wallet:{" "}
                 <span className="text-white break-all">{userAddress}</span>
               </p>
-              <p className="mt-1 font-epilogue text-[#808191]">
-                Total Raised:{" "}
-                <span className="text-white">{donationsTotal} ETH</span>
-              </p>
+              {userData?.role !== "DONOR" && showCreated && (
+                <p className="mt-1 font-epilogue text-[#808191]">
+                  Total Raised:{" "}
+                  <span className="text-white">{donationsTotal} ETH</span>
+                </p>
+              )}
             </div>
           </div>
         )}
