@@ -271,40 +271,40 @@ export const StateContextProvider = ({ children }) => {
 
   // Add this function to the Campaign component
 
-  const getCampaignsByOwner = async (ownerAddress) => {
-    if (!ownerAddress) return [];
+  // const getCampaignsByOwner = async (ownerAddress) => {
+  //   if (!ownerAddress) return [];
 
-    setIsLoading(true);
+  //   setIsLoading(true);
 
-    try {
-      // Get campaigns from the blockchain
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const contract = new ethers.Contract(
-        "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
-        CampaignFactoryABI.abi,
-        signer
-      );
+  //   try {
+  //     // Get campaigns from the blockchain
+  //     const provider = new ethers.BrowserProvider(window.ethereum);
+  //     const signer = await provider.getSigner();
+  //     const contract = new ethers.Contract(
+  //       "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
+  //       CampaignFactoryABI.abi,
+  //       signer
+  //     );
 
-      // First check if we already have campaigns loaded
-      let allCampaigns = campaigns;
-      if (allCampaigns.length === 0) {
-        allCampaigns = await contract.getCampaigns();
-      }
+  //     // First check if we already have campaigns loaded
+  //     let allCampaigns = campaigns;
+  //     if (allCampaigns.length === 0) {
+  //       allCampaigns = await contract.getCampaigns();
+  //     }
 
-      // Filter campaigns by owner
-      const ownerCampaigns = allCampaigns.filter(
-        (campaign) => campaign[5].toLowerCase() === ownerAddress.toLowerCase()
-      );
+  //     // Filter campaigns by owner
+  //     const ownerCampaigns = allCampaigns.filter(
+  //       (campaign) => campaign[5].toLowerCase() === ownerAddress.toLowerCase()
+  //     );
 
-      return ownerCampaigns;
-    } catch (error) {
-      console.error("Failed to fetch campaigns by owner:", error);
-      return [];
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //     return ownerCampaigns;
+  //   } catch (error) {
+  //     console.error("Failed to fetch campaigns by owner:", error);
+  //     return [];
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   const createCampaign = async (form) => {
     setIsLoading(true);
@@ -595,89 +595,92 @@ export const StateContextProvider = ({ children }) => {
   };
   // ...existing code...
 
-// Add this function to handle campaign milestone checks after donations
-const checkCampaignMilestone = async (campaign, campaignTitle, campaignId, donationAmountWei) => {
-  try {
-    // Calculate campaign progress percentage
-    const goalWei = ethers.parseEther(campaign.goal.toString());
-    const raisedWithNewDonation =
-      ethers.parseEther(campaign.raised.toString()) + donationAmountWei;
-    const progressPercentage = Math.floor(
-      (raisedWithNewDonation * BigInt(100)) / goalWei
-    );
-
-    // Define milestones (25%, 50%, 75%, 100%)
-    const milestones = [25, 50, 75, 100];
-
-    // Check if a milestone was just crossed
-    for (const milestone of milestones) {
-      const previousProgress = Math.floor(
-        (ethers.parseEther(campaign.raised.toString()) * BigInt(100)) /
-          goalWei
+  // Add this function to handle campaign milestone checks after donations
+  const checkCampaignMilestone = async (
+    campaign,
+    campaignTitle,
+    campaignId,
+    donationAmountWei
+  ) => {
+    try {
+      // Calculate campaign progress percentage
+      const goalWei = ethers.parseEther(campaign.goal.toString());
+      const raisedWithNewDonation =
+        ethers.parseEther(campaign.raised.toString()) + donationAmountWei;
+      const progressPercentage = Math.floor(
+        (raisedWithNewDonation * BigInt(100)) / goalWei
       );
 
-      // If we just crossed this milestone
-      if (progressPercentage >= milestone && previousProgress < milestone) {
-        // Find the campaign owner's ID from the database
-        const ownerResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/users/address/${campaign.owner}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session?.accessToken}`,
-            },
-          }
+      // Define milestones (25%, 50%, 75%, 100%)
+      const milestones = [25, 50, 75, 100];
+
+      // Check if a milestone was just crossed
+      for (const milestone of milestones) {
+        const previousProgress = Math.floor(
+          (ethers.parseEther(campaign.raised.toString()) * BigInt(100)) /
+            goalWei
         );
 
-        if (ownerResponse.ok) {
-          const ownerData = await ownerResponse.json();
-          // Create milestone notification for the campaign owner
-          await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/notifications`,
+        // If we just crossed this milestone
+        if (progressPercentage >= milestone && previousProgress < milestone) {
+          // Find the campaign owner's ID from the database
+          const ownerResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/users/address/${campaign.owner}`,
             {
-              method: "POST",
+              method: "GET",
               headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${session?.accessToken}`,
               },
-              body: JSON.stringify({
-                userId: ownerData.id,
-                type: "CAMPAIGN_MILESTONE",
-                message: `Your campaign "${campaignTitle}" has reached ${milestone}% of its goal!`,
-                data: { campaignId, campaignTitle, milestone },
-              }),
             }
           );
-        }
 
-        // If we've reached 100%, send a completion notification
-        if (milestone === 100) {
-          await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/notifications`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${session?.accessToken}`,
-              },
-              body: JSON.stringify({
-                userId: ownerData.id,
-                type: "CAMPAIGN_COMPLETE",
-                message: `Congratulations! Your campaign "${campaignTitle}" has been fully funded!`,
-                data: { campaignId, campaignTitle },
-              }),
-            }
-          );
+          if (ownerResponse.ok) {
+            const ownerData = await ownerResponse.json();
+            // Create milestone notification for the campaign owner
+            await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/notifications`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${session?.accessToken}`,
+                },
+                body: JSON.stringify({
+                  userId: ownerData.id,
+                  type: "CAMPAIGN_MILESTONE",
+                  message: `Your campaign "${campaignTitle}" has reached ${milestone}% of its goal!`,
+                  data: { campaignId, campaignTitle, milestone },
+                }),
+              }
+            );
+          }
+
+          // If we've reached 100%, send a completion notification
+          if (milestone === 100) {
+            await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/notifications`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${session?.accessToken}`,
+                },
+                body: JSON.stringify({
+                  userId: ownerData.id,
+                  type: "CAMPAIGN_COMPLETE",
+                  message: `Congratulations! Your campaign "${campaignTitle}" has been fully funded!`,
+                  data: { campaignId, campaignTitle },
+                }),
+              }
+            );
+          }
         }
       }
+    } catch (error) {
+      console.error("Failed to check campaign milestone:", error);
     }
-  } catch (error) {
-    console.error("Failed to check campaign milestone:", error);
-  }
-};
-
-// ...existing code...
+  };
 
   return (
     <StateContext.Provider
@@ -686,8 +689,7 @@ const checkCampaignMilestone = async (campaign, campaignTitle, campaignId, donat
         connect,
         campaigns,
         fetchCampaigns,
-        getCampaignsByOwner, // Add this line
-        isLoading,
+        //getCampaignsByOwner,
         getUserCampaigns,
         userCampaigns,
         createCampaign,

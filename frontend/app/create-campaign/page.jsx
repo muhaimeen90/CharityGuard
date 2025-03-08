@@ -1,7 +1,7 @@
 // frontend/pages/create-campaign.js
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useStateContext } from "../context/Campaign";
 import FormField from "../components/FormField";
@@ -9,6 +9,7 @@ import CustomButton from "../components/CustomButton";
 import { ethers } from "ethers";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useSession } from "next-auth/react";
 
 export default function CreateCampaignPage() {
   const [form, setForm] = useState({
@@ -22,6 +23,31 @@ export default function CreateCampaignPage() {
   const { createCampaign, isLoading, address } = useStateContext();
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState("");
+  const { data: session } = useSession();
+  const [userInfo, setUserInfo] = useState(null);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      if (session?.user) {
+        setUserInfo({
+          id: session.user.id,
+          email: session.user.email,
+          role: session.user.role || "USER",
+        });
+      }
+    };
+
+    fetchUserInfo();
+  }, [session]);
+
+  useEffect(() => {
+    if (userInfo?.role === "FUNDRAISER" && address) {
+      setForm((prevForm) => ({
+        ...prevForm,
+        recipients: [address],
+      }));
+    }
+  }, [userInfo, address]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,20 +61,6 @@ export default function CreateCampaignPage() {
       const formattedTarget = ethers.parseEther(form.target);
 
       const validRecipients = form.recipients;
-      //   try {
-      //     ethers.getAddress(recipient);
-      //     return true;
-      //   } catch (error) {
-      //     setErrorMessage(
-      //       "Invalid recipient address. Please check the recipient address."
-      //     );
-      //     return false;
-      //   }
-      // });
-
-      // if (validRecipients.length !== form.recipients.length) {
-      //   return;
-      // }
 
       const deadlineTimestamp = Math.floor(form.deadline.getTime() / 1000);
       if (isNaN(deadlineTimestamp) || deadlineTimestamp <= Date.now() / 1000) {
@@ -124,6 +136,7 @@ export default function CreateCampaignPage() {
               placeholder="Recipient Address"
               value={recipient}
               onChange={(e) => handleRecipientChange(index, e)}
+              disabled={userInfo?.role === "FUNDRAISER" && index === 0}
             />
             {index > 0 && (
               <button
@@ -140,13 +153,15 @@ export default function CreateCampaignPage() {
             )}
           </div>
         ))}
-        <button
-          type="button"
-          onClick={addRecipient}
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-2"
-        >
-          Add Recipient
-        </button>
+        {userInfo?.role === "CHARITY" && (
+          <button
+            type="button"
+            onClick={addRecipient}
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-2"
+          >
+            Add Recipient
+          </button>
+        )}
         <div className="mb-4">
           <label htmlFor="deadline" className="text-white block mb-2">
             Deadline
