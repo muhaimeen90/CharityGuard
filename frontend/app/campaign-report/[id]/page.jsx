@@ -7,11 +7,10 @@ import CountBox from "../../components/CountBox";
 import CustomButton from "../../components/CustomButton";
 import FormField from "../../components/FormField";
 import { daysLeft, weiToEth } from "../../utils";
-import Loader from "../../components/Loader"; // Assuming you have a Loader component
+import Loader from "../../components/Loader";
 import Image from "next/image";
-import { profile } from "../../assets"; // Assuming you have the thirdweb logo
+import { profile } from "../../assets";
 import { jsPDF } from "jspdf";
-//import
 
 export default function CampaignDetailsPage() {
   const { id } = useParams();
@@ -22,6 +21,7 @@ export default function CampaignDetailsPage() {
     fetchDonors,
     recipients,
     fetchRecipients,
+    contractAddress, // Add contractAddress from context
   } = useStateContext();
   const [campaign, setCampaign] = useState();
   const [amount, setAmount] = useState("");
@@ -37,7 +37,6 @@ export default function CampaignDetailsPage() {
       try {
         const campaignId = BigInt(id);
 
-        // Find the campaign in the campaigns array
         const selectedCampaign = campaigns.find(
           (campaign) => BigInt(campaign[0]) === campaignId
         );
@@ -46,9 +45,8 @@ export default function CampaignDetailsPage() {
           console.log("Selected Campaign:", selectedCampaign);
           setCampaign(selectedCampaign);
 
-          // Fetch donors for the campaign
           await fetchDonors(campaignId);
-
+          console.log("donors", donors);
           setCampaignDonors(donors);
 
           if (selectedCampaign.isActive === false) {
@@ -73,69 +71,50 @@ export default function CampaignDetailsPage() {
   }, [address, id, campaigns]);
 
   const generatePDF = (campaignTitle, ownerAddress) => {
-    // Create a new jsPDF instance
     const doc = new jsPDF();
 
-    // Add a title to the PDF
     doc.setFontSize(18);
     doc.text("Campaign Donors and Recipients", 10, 10);
 
-    // Add campaign title and owner address
     doc.setFontSize(12);
     doc.text(`Campaign Title: ${campaign.title}`, 10, 20);
     doc.text(`Owner Address: ${campaign.owner}`, 10, 30);
+    doc.text(`Contract Address: ${contractAddress}`, 10, 40); // Add contract address
 
-    // Add donors section
     doc.setFontSize(14);
-    doc.text("Donors:", 10, 40);
-    let yOffset = 50; // Vertical offset for content
+    doc.text("Donors:", 10, 50); // Adjust yOffset
+    let yOffset = 60;
 
     campaignDonors.forEach((donor, index) => {
       doc.setFontSize(12);
 
-      // Add donor number
       doc.text(`${index + 1}.`, 10, yOffset);
-      yOffset += 7; // Move down for the next line
+      yOffset += 7;
 
-      // Add donor address
       doc.text(`Address: ${donor.donorAddress}`, 15, yOffset);
-      yOffset += 7; // Move down for the next line
+      yOffset += 7;
 
-      // Add donor amount
       doc.text(`Amount: ${weiToEth(donor.amount)} ETH`, 15, yOffset);
-      yOffset += 7; // Move down for the next line
-
-      // Add donor transaction hash
-      doc.text(`Tx Hash: ${donor.txHash}`, 15, yOffset);
-      yOffset += 10; // Add extra space between donors
+      yOffset += 10;
     });
 
-    // Add recipients section
     doc.setFontSize(14);
     doc.text("Recipients:", 10, yOffset);
-    yOffset += 10; // Move down for the next section
+    yOffset += 10;
 
     campaignRecipients.forEach((recipient, index) => {
       doc.setFontSize(12);
 
-      // Add recipient number
       doc.text(`${index + 1}.`, 10, yOffset);
-      yOffset += 7; // Move down for the next line
+      yOffset += 7;
 
-      // Add recipient address
       doc.text(`Address: ${recipient.recipientAddress}`, 15, yOffset);
-      yOffset += 7; // Move down for the next line
+      yOffset += 7;
 
-      // Add recipient amount
       doc.text(`Amount: ${weiToEth(recipient.amount)} ETH`, 15, yOffset);
-      yOffset += 7; // Move down for the next line
-
-      // Add recipient transaction hash
-      doc.text(`Tx Hash: ${recipient.txHash}`, 15, yOffset);
-      yOffset += 10; // Add extra space between recipients
+      yOffset += 10;
     });
 
-    // Save the PDF
     doc.save("campaign_details.pdf");
   };
 
@@ -143,8 +122,13 @@ export default function CampaignDetailsPage() {
 
   return (
     <div className="p-6 bg-[#1c1c24] rounded-lg shadow-lg">
-      {/* Button to Generate PDF */}
-      <div className="flex justify-end mb-6">
+      <div className="flex justify-between items-center mb-6">
+        <div className="mb-4">
+          <p className="font-epilogue font-normal text-[16px] text-[#808191] break-all">
+            <span className="font-semibold text-white">Contract Address:</span>{" "}
+            <span className="text-blue-400">{contractAddress}</span>
+          </p>
+        </div>
         <button
           onClick={generatePDF}
           className="bg-[#4e44ce] text-white px-4 py-2 rounded-lg hover:bg-[#3a32a0] transition-all"
@@ -153,7 +137,6 @@ export default function CampaignDetailsPage() {
         </button>
       </div>
 
-      {/* Donators Section */}
       <div className="mb-8">
         <h4 className="font-epilogue font-semibold text-[18px] text-white uppercase mb-4">
           Donators
@@ -167,7 +150,6 @@ export default function CampaignDetailsPage() {
                 className="flex justify-between items-center gap-4 p-4 bg-[#2c2f32] rounded-lg hover:bg-[#3a3d42] transition-all"
               >
                 <div className="flex items-center gap-4">
-                  {/* Clickable Image */}
                   <div
                     className="w-[52px] h-[52px] flex items-center justify-center rounded-full bg-[#1c1c24] cursor-pointer"
                     onClick={() =>
@@ -195,9 +177,6 @@ export default function CampaignDetailsPage() {
                   <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] break-all">
                     {weiToEth(donor.amount)} ETH
                   </p>
-                  <p className="font-epilogue font-normal text-[12px] text-[#808191] break-all">
-                    Tx Hash: {donor.txHash}
-                  </p>
                 </div>
               </div>
             ))
@@ -209,7 +188,6 @@ export default function CampaignDetailsPage() {
         </div>
       </div>
 
-      {/* Recipients Section */}
       <div>
         <h4 className="font-epilogue font-semibold text-[18px] text-white uppercase mb-4">
           Recipients
@@ -228,9 +206,6 @@ export default function CampaignDetailsPage() {
                 <div className="text-right">
                   <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] break-all">
                     {weiToEth(recipient.amount)} ETH
-                  </p>
-                  <p className="font-epilogue font-normal text-[12px] text-[#808191] break-all">
-                    Tx Hash: {recipient.txHash}
                   </p>
                 </div>
               </div>

@@ -82,6 +82,8 @@ export const StateContextProvider = ({ children }) => {
     }
   };
 
+  const contractAddress = "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC";
+
   const fetchDonors = async (campaignId) => {
     setIsLoading(true);
     try {
@@ -700,6 +702,7 @@ export const StateContextProvider = ({ children }) => {
         fetchRecipients,
         donatedCampaigns,
         campaignsDonatedTo,
+        contractAddress,
       }}
     >
       {children}
