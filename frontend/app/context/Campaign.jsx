@@ -46,29 +46,98 @@ export const StateContextProvider = ({ children }) => {
       window.open("https://metamask.io/download/", "_blank");
       return;
     }
-
+  
     setIsLoading(true);
     try {
+      // First, get MetaMask accounts
       const accounts = await window.ethereum.request({
         method: "eth_requestAccounts",
       });
-
-      if (accounts.length > 0) {
-        setAddress(accounts[0]);
-
+  
+      if (accounts.length === 0) {
+        alert("No accounts found. Please unlock MetaMask and try again.");
+        setIsLoading(false);
+        return;
+      }
+  
+      const metamaskAddress = accounts[0];
+      
+      // Only verify wallet address if user is logged in
+      if (session?.user) {
+        try {
+          // Fetch the user's registered wallet address from the database
+          const userResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/users/me`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session.user.accessToken}`,
+              },
+            }
+          );
+  
+          if (!userResponse.ok) {
+            const errorText = await userResponse.text();
+            console.error("Failed to fetch user data:", errorText);
+            alert("Failed to verify wallet address. Please try again later.");
+            setIsLoading(false);
+            return;
+          }
+  
+          const userData = await userResponse.json();
+          const registeredAddress = userData.smartWalletAddress;
+  
+          // Compare addresses (case-insensitive)
+          if (!registeredAddress) {
+            alert(
+              "No wallet address found in your profile. Please update your profile with a wallet address."
+            );
+            setIsLoading(false);
+            return;
+          }
+  
+          if (metamaskAddress.toLowerCase() !== registeredAddress.toLowerCase()) {
+            alert(
+              "Error: The connected MetaMask address doesn't match the wallet address you registered with. Please use the correct wallet."
+            );
+            setIsLoading(false);
+            return;
+          }
+  
+          console.log("Wallet address verified successfully:", metamaskAddress);
+        } catch (error) {
+          console.error("Error verifying wallet address:", error);
+          alert("Failed to verify wallet address. Please try again later.");
+          setIsLoading(false);
+          return;
+        }
+      }
+  
+      // If we made it here, either the addresses match or the user isn't logged in
+      setAddress(metamaskAddress);
+  
+      try {
+        // Connect to the blockchain and set up the contract
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
-
+  
         const contractInstance = new ethers.Contract(
           "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
           CampaignFactoryABI.abi,
           signer
         );
-
+  
         setContract(contractInstance);
-        fetchCampaigns();
-      } else {
-        alert("No accounts found. Please unlock MetaMask and try again.");
+        
+        // Fetch campaigns after successful connection
+        await fetchCampaigns();
+        
+        console.log("Wallet connected successfully:", metamaskAddress);
+      } catch (error) {
+        console.error("Contract connection error:", error);
+        alert("Failed to connect to the blockchain. Please try again later.");
+        setAddress(null); // Reset address since connection failed
       }
     } catch (error) {
       console.error("Failed to connect to MetaMask:", error);
@@ -77,7 +146,6 @@ export const StateContextProvider = ({ children }) => {
       setIsLoading(false);
     }
   };
-
   const contractAddress = "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC";
 
   const fetchDonors = async (campaignId) => {
