@@ -13,8 +13,8 @@ router.get('/me', authenticate, UserController.getCurrentUser);
 
 // ...existing code...
 
-// Add this route to your existing user routes
-router.get('/address/:walletAddress', authenticate, async (req, res) => {
+// Add this route to your user routes file - make it public without auth requirement
+router.get('/address/:walletAddress', async (req, res) => {
     try {
       const { walletAddress } = req.params;
       
@@ -22,18 +22,27 @@ router.get('/address/:walletAddress', authenticate, async (req, res) => {
         return res.status(400).json({ error: 'Wallet address is required' });
       }
       
-      const user = await User.findOne({ where: { walletAddress: walletAddress.toLowerCase() } });
+      // Look up user by wallet address (case-insensitive)
+      const user = await prisma.user.findFirst({
+        where: {
+          walletAddress: {
+            equals: walletAddress,
+            mode: 'insensitive'
+          }
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          walletAddress: true
+        }
+      });
       
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
       
-      return res.status(200).json({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        walletAddress: user.walletAddress
-      });
+      return res.status(200).json(user);
     } catch (error) {
       console.error('Error fetching user by wallet address:', error);
       return res.status(500).json({ error: 'Internal server error' });

@@ -451,58 +451,60 @@ export const StateContextProvider = ({ children }) => {
 
       // IMPORTANT: Move the campaign owner notification here, after transaction is confirmed
       // but before any other operations like milestone checks
-      try {
-        // Find the campaign owner's ID from the database
-        const ownerResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/users/address/${campaign.owner}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session?.accessToken}`,
-            },
-          }
-        );
+      // In the donate function, replace the owner notification part with:
 
-        if (ownerResponse.ok) {
-          const ownerData = await ownerResponse.json();
-          console.log("Campaign owner data:", ownerData); // Add debug log
+try {
+  // Find the campaign owner's ID from the database - without auth header for public endpoint
+  const ownerResponse = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/users/address/${campaign.owner}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
-          // Create notification for the campaign owner
-          const notificationResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/notifications`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${session?.accessToken}`,
-              },
-              body: JSON.stringify({
-                userId: ownerData.id,
-                type: "DONATION_RECEIVED",
-                message: `Someone donated ${donationAmount} ETH to your campaign "${campaignTitle}"`,
-                data: { campaignId, campaignTitle, amount: donationAmount },
-              }),
-            }
-          );
-
-          if (!notificationResponse.ok) {
-            console.error(
-              "Failed to create owner notification:",
-              await notificationResponse.text()
-            );
-          }
-        } else {
-          console.error(
-            "Failed to fetch owner data:",
-            await ownerResponse.text()
-          );
+  if (ownerResponse.ok) {
+    const ownerData = await ownerResponse.json();
+    console.log("Campaign owner data:", ownerData);
+    
+    // Now that we have the owner data, create the notification
+    // Only use auth token for this part if available
+    if (session?.accessToken) {
+      const notificationResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/notifications`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.accessToken}`,
+          },
+          body: JSON.stringify({
+            userId: ownerData.id,
+            type: "DONATION_RECEIVED",
+            message: `Someone donated ${donationAmount} ETH to your campaign "${campaignTitle}"`,
+            data: { campaignId, campaignTitle, amount: donationAmount },
+          }),
         }
-      } catch (error) {
-        console.error("Failed to notify campaign owner:", error);
+      );
+      
+      if (!notificationResponse.ok) {
+        console.error("Failed to create owner notification:", await notificationResponse.text());
+      } else {
+        console.log("Notification sent to campaign owner successfully");
       }
-
-      // Check if the campaign reached a milestone - moved after owner notification
+    } else {
+      console.log("No user session, skipping notification creation");
+    }
+  } else {
+    console.error("Could not fetch campaign owner data:", await ownerResponse.text());
+    // You might want to add a fallback mechanism here
+  }
+} catch (error) {
+  console.error("Error in owner notification process:", error);
+  // Don't let notification errors stop the donation process
+}// Check if the campaign reached a milestone - moved after owner notification
       await checkCampaignMilestone(
         campaign,
         campaignTitle,
@@ -510,7 +512,6 @@ export const StateContextProvider = ({ children }) => {
         donationAmountWei
       );
 
-      alert("Donation successful!");
 
       // Refresh the campaigns list after donation
       await fetchCampaigns();
@@ -632,7 +633,6 @@ export const StateContextProvider = ({ children }) => {
               method: "GET",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${session?.accessToken}`,
               },
             }
           );
