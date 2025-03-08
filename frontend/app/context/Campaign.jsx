@@ -609,7 +609,7 @@ export const StateContextProvider = ({ children }) => {
       const goalWei = ethers.parseEther(campaign.goal.toString());
       const raisedWithNewDonation =
         ethers.parseEther(campaign.raised.toString()) + donationAmountWei;
-      const progressPercentage = Math.floor(
+      const progressPercentage = Number(
         (raisedWithNewDonation * BigInt(100)) / goalWei
       );
 
@@ -618,7 +618,7 @@ export const StateContextProvider = ({ children }) => {
 
       // Check if a milestone was just crossed
       for (const milestone of milestones) {
-        const previousProgress = Math.floor(
+        const previousProgress = Number(
           (ethers.parseEther(campaign.raised.toString()) * BigInt(100)) /
             goalWei
         );
