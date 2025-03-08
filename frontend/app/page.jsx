@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import CustomButton from "./components/CustomButton";
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
+import money from "./assets/money.svg";
 
 export default function Home() {
   const router = useRouter();
@@ -60,11 +62,7 @@ export default function Home() {
       </div>
 
       <div className="w-full flex justify-center items-center p-4 bg-[#3a3a43] rounded-[10px] mt-12 max-w-[800px]">
-        <img
-          src="/money.png"
-          alt="money"
-          className="w-[60px] h-[60px] object-contain"
-        />
+        <Image src={money} alt="money" height={50} width={50} />
         <h4 className="font-epilogue font-bold text-[25px] text-white ml-[20px]">
           100% of the raised amount goes directly to the cause.
         </h4>

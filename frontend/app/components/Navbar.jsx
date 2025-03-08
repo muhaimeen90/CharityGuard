@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useStateContext } from "../context/Campaign";
 import { navlinks } from "../constants";
-import { search, profile } from "../assets";
+import { profile } from "../assets";
 import NotificationBell from "./NotificationBell";
 import Image from "next/image";
 
