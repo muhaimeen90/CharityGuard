@@ -39,9 +39,7 @@ const RegisterPage = () => {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.error || "Registration failed");
-      }
+      
 
       // Redirect to verification page with email pre-filled
       router.push(`/verify-email?email=${encodeURIComponent(email)}`);
