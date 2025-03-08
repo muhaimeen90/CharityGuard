@@ -18,7 +18,6 @@ export const StateContextProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { data: session } = useSession();
 
-  // Function to create a notification in the backend
   const createNotification = async (type, message, data = {}) => {
     if (!session?.user?.accessToken) return;
 
@@ -41,7 +40,6 @@ export const StateContextProvider = ({ children }) => {
     }
   };
 
-  // Connect to MetaMask - Fixed implementation
   const connect = async () => {
     if (!window.ethereum) {
       alert("Please install MetaMask to use this feature.");
@@ -51,7 +49,6 @@ export const StateContextProvider = ({ children }) => {
 
     setIsLoading(true);
     try {
-      // Request account access
       const accounts = await window.ethereum.request({
         method: "eth_requestAccounts",
       });
@@ -59,7 +56,6 @@ export const StateContextProvider = ({ children }) => {
       if (accounts.length > 0) {
         setAddress(accounts[0]);
 
-        // Set up contract instance
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
 
@@ -70,7 +66,7 @@ export const StateContextProvider = ({ children }) => {
         );
 
         setContract(contractInstance);
-        fetchCampaigns(); // Fetch campaigns after successful connection
+        fetchCampaigns();
       } else {
         alert("No accounts found. Please unlock MetaMask and try again.");
       }
@@ -87,17 +83,9 @@ export const StateContextProvider = ({ children }) => {
   const fetchDonors = async (campaignId) => {
     setIsLoading(true);
     try {
-      // const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545/");
-      // const signers = await provider.listAccounts();
-      // const contract = new ethers.Contract(
-      //   "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-      //   CampaignFactoryABI.abi,
-      //   signers[4]
-
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
-        //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
         "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
         CampaignFactoryABI.abi,
         signer
@@ -116,17 +104,9 @@ export const StateContextProvider = ({ children }) => {
   const fetchRecipients = async (campaignId) => {
     setIsLoading(true);
     try {
-      // const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545/");
-      // const signers = await provider.listAccounts();
-      // const contract = new ethers.Contract(
-      //   "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-      //   CampaignFactoryABI.abi,
-      //   signers[4]
-
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
-        //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
         "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
         CampaignFactoryABI.abi,
         signer
@@ -142,27 +122,18 @@ export const StateContextProvider = ({ children }) => {
     }
   };
 
-  // Fetch campaigns from the contract - Fix to load regardless of wallet connection
   const fetchCampaigns = async () => {
     setIsLoading(true);
     try {
-      // const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545/");
-      // const signers = await provider.listAccounts();
-      // const contract = new ethers.Contract(
-      //   "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-      //   CampaignFactoryABI.abi,
-      //   signers[3]
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
-        //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
         "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
         CampaignFactoryABI.abi,
         signer
       );
 
       const campaigns = await contract.getAllCampaigns();
-      //console.log("Campaigns fetched:", campaigns);
       setCampaigns(campaigns);
     } catch (error) {
       console.error("Failed to fetch campaigns:", error);
@@ -171,7 +142,6 @@ export const StateContextProvider = ({ children }) => {
     }
   };
 
-  // Listen for account changes in MetaMask
   useEffect(() => {
     if (!window.ethereum) return;
 
@@ -185,61 +155,28 @@ export const StateContextProvider = ({ children }) => {
 
     window.ethereum.on("accountsChanged", handleAccountsChanged);
 
-    //   // Check if already connected
-    //   const checkConnection = async () => {
-    //     try {
-    //       const accounts = await window.ethereum.request({
-    //         method: "eth_accounts",
-    //       });
-    //       if (accounts.length > 0) {
-    //         setAddress(accounts[0]);
-
-    //         const provider = new ethers.BrowserProvider(window.ethereum);
-    //         const signer = await provider.getSigner();
-
-    //         const contractInstance = new ethers.Contract(
-    //           "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
-    //           CampaignFactoryABI.abi,
-    //           signer
-    //         );
-
-    //         setContract(contractInstance);
-    //       }
-    //     } catch (error) {
-    //       console.error("Error checking connection:", error);
-    //     }
-    //   };
-
-    //checkConnection();
-
     return () => {
       window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
     };
   }, []);
 
-  // Automatically fetch campaigns on component mount
   useEffect(() => {
     fetchCampaigns();
   }, []);
-  // Add after the existing useEffect that fetchs campaigns (around line 614)
 
-  // Add a separate useEffect for deadline checks
   useEffect(() => {
     if (campaigns.length > 0 && session?.user) {
-      // Check deadlines immediately after campaigns are loaded
       checkCampaignDeadlines();
 
-      // Set up interval to periodically check deadlines (every 6 hours)
       const deadlineInterval = setInterval(() => {
         checkCampaignDeadlines();
-      }, 6 * 60 * 60 * 1000); // Check every 6 hours
+      }, 6 * 60 * 60 * 1000);
 
       return () => {
         clearInterval(deadlineInterval);
       };
     }
   }, [campaigns, session]);
-  // Update the getUserCampaigns function:
 
   const getUserCampaigns = async () => {
     if (!address) return;
@@ -249,13 +186,11 @@ export const StateContextProvider = ({ children }) => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
-        //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
         "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
         CampaignFactoryABI.abi,
         signer
       );
 
-      // Use the connected wallet address
       const userCampaignsList = await contract.getUserCampaigns(address);
       console.log("User campaigns fetched:", userCampaignsList);
 
@@ -264,66 +199,19 @@ export const StateContextProvider = ({ children }) => {
       return userCampaignsList;
     } catch (error) {
       console.error("Failed to fetch user campaigns:", error);
-      setUserCampaigns([]); // Set to empty array on error
+      setUserCampaigns([]);
       return [];
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Add this function to the Campaign component
-
-  // const getCampaignsByOwner = async (ownerAddress) => {
-  //   if (!ownerAddress) return [];
-
-  //   setIsLoading(true);
-
-  //   try {
-  //     // Get campaigns from the blockchain
-  //     const provider = new ethers.BrowserProvider(window.ethereum);
-  //     const signer = await provider.getSigner();
-  //     const contract = new ethers.Contract(
-  //       "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
-  //       CampaignFactoryABI.abi,
-  //       signer
-  //     );
-
-  //     // First check if we already have campaigns loaded
-  //     let allCampaigns = campaigns;
-  //     if (allCampaigns.length === 0) {
-  //       allCampaigns = await contract.getCampaigns();
-  //     }
-
-  //     // Filter campaigns by owner
-  //     const ownerCampaigns = allCampaigns.filter(
-  //       (campaign) => campaign[5].toLowerCase() === ownerAddress.toLowerCase()
-  //     );
-
-  //     return ownerCampaigns;
-  //   } catch (error) {
-  //     console.error("Failed to fetch campaigns by owner:", error);
-  //     return [];
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   const createCampaign = async (form) => {
     setIsLoading(true);
     try {
-      // const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545/");
-      // const signers = await provider.listAccounts();
-      // console.log("Signer:", signers);
-
-      // const contract = new ethers.Contract(
-      //   "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-      //   CampaignFactoryABI.abi,
-      //   signers[4]
-
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
-        //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
         "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
         CampaignFactoryABI.abi,
         signer
@@ -333,7 +221,6 @@ export const StateContextProvider = ({ children }) => {
       const goal = form.target;
       const recipients = form.recipients;
 
-      // Call smart contract function
       const transaction = await contract.createCampaign(
         form.title,
         form.description,
@@ -342,16 +229,14 @@ export const StateContextProvider = ({ children }) => {
         deadline,
         form.image,
         {
-          gasLimit: 9999000, // Increase gas limit
+          gasLimit: 9999000,
         }
       );
 
-      // Wait for transaction to be mined
       await transaction.wait();
 
       console.log("Campaign created successfully:", transaction);
 
-      // Add notification for campaign creation
       if (session?.user) {
         await createNotification(
           "CAMPAIGN_CREATED",
@@ -360,7 +245,6 @@ export const StateContextProvider = ({ children }) => {
         );
       }
 
-      // Refresh campaigns after creating a new one
       await fetchCampaigns();
     } catch (error) {
       console.error("Contract error:", error);
@@ -378,13 +262,11 @@ export const StateContextProvider = ({ children }) => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
-        //process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
         "0xcFbd89190Ca387fDee54e0dd59B0d10F7B159BfC",
         CampaignFactoryABI.abi,
         signer
       );
 
-      // Use the connected wallet address
       const userCampaignsList = await contract.getUserDonations(waddress);
       console.log("User's donated campaigns fetched:", userCampaignsList);
 
@@ -393,7 +275,7 @@ export const StateContextProvider = ({ children }) => {
       return userCampaignsList;
     } catch (error) {
       console.error("Failed to fetch user donated campaigns:", error);
-      setDonatedCampaigns([]); // Set to empty array on error
+      setDonatedCampaigns([]);
       return [];
     } finally {
       setIsLoading(false);
@@ -421,26 +303,21 @@ export const StateContextProvider = ({ children }) => {
         signer
       );
 
-      // Convert donation amount to Wei
       const donationAmountWei = ethers.parseEther(donationAmount.toString());
 
-      // Find campaign details for notification
       const campaign = campaigns.find((c) => c.id == campaignId);
       const campaignTitle = campaign
         ? campaign.title
         : "Campaign #" + campaignId;
 
-      // Call the donate function in the smart contract
       const transaction = await contract.donate(campaignId, {
         value: donationAmountWei,
       });
 
-      // Wait for the transaction to be mined
       await transaction.wait();
 
       console.log("Donation successful:", transaction);
 
-      // Create notification for the donor
       if (session?.user) {
         await createNotification(
           "DONATION",
@@ -449,62 +326,60 @@ export const StateContextProvider = ({ children }) => {
         );
       }
 
-      // IMPORTANT: Move the campaign owner notification here, after transaction is confirmed
-      // but before any other operations like milestone checks
-      // In the donate function, replace the owner notification part with:
+      try {
+        const ownerResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/users/address/${campaign.owner}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-try {
-  // Find the campaign owner's ID from the database - without auth header for public endpoint
-  const ownerResponse = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/users/address/${campaign.owner}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
+        if (ownerResponse.ok) {
+          const ownerData = await ownerResponse.json();
+          console.log("Campaign owner data:", ownerData);
 
-  if (ownerResponse.ok) {
-    const ownerData = await ownerResponse.json();
-    console.log("Campaign owner data:", ownerData);
-    
-    // Now that we have the owner data, create the notification
-    // Only use auth token for this part if available
-    if (session?.accessToken) {
-      const notificationResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/notifications`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.accessToken}`,
-          },
-          body: JSON.stringify({
-            userId: ownerData.id,
-            type: "DONATION_RECEIVED",
-            message: `Someone donated ${donationAmount} ETH to your campaign "${campaignTitle}"`,
-            data: { campaignId, campaignTitle, amount: donationAmount },
-          }),
+          if (session?.accessToken) {
+            const notificationResponse = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/notifications`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${session.accessToken}`,
+                },
+                body: JSON.stringify({
+                  userId: ownerData.id,
+                  type: "DONATION_RECEIVED",
+                  message: `Someone donated ${donationAmount} ETH to your campaign "${campaignTitle}"`,
+                  data: { campaignId, campaignTitle, amount: donationAmount },
+                }),
+              }
+            );
+
+            if (!notificationResponse.ok) {
+              console.error(
+                "Failed to create owner notification:",
+                await notificationResponse.text()
+              );
+            } else {
+              console.log("Notification sent to campaign owner successfully");
+            }
+          } else {
+            console.log("No user session, skipping notification creation");
+          }
+        } else {
+          console.error(
+            "Could not fetch campaign owner data:",
+            await ownerResponse.text()
+          );
         }
-      );
-      
-      if (!notificationResponse.ok) {
-        console.error("Failed to create owner notification:", await notificationResponse.text());
-      } else {
-        console.log("Notification sent to campaign owner successfully");
+      } catch (error) {
+        console.error("Error in owner notification process:", error);
       }
-    } else {
-      console.log("No user session, skipping notification creation");
-    }
-  } else {
-    console.error("Could not fetch campaign owner data:", await ownerResponse.text());
-    // You might want to add a fallback mechanism here
-  }
-} catch (error) {
-  console.error("Error in owner notification process:", error);
-  // Don't let notification errors stop the donation process
-}// Check if the campaign reached a milestone - moved after owner notification
+
       await checkCampaignMilestone(
         campaign,
         campaignTitle,
@@ -512,8 +387,6 @@ try {
         donationAmountWei
       );
 
-
-      // Refresh the campaigns list after donation
       await fetchCampaigns();
     } catch (error) {
       console.error("Failed to donate:", error);
@@ -523,9 +396,6 @@ try {
     }
   };
 
-  // Add after the donate function (around line 922)
-
-  // Function to check campaign deadlines
   const checkCampaignDeadlines = async () => {
     try {
       if (!campaigns || !campaigns.length || !session?.user) return;
@@ -533,18 +403,15 @@ try {
       const now = Date.now();
 
       for (const campaign of campaigns) {
-        // Skip if campaign is not active
         if (!campaign.isActive) continue;
 
-        const deadline = Number(campaign.deadline) * 1000; // Convert to milliseconds
+        const deadline = Number(campaign.deadline) * 1000;
 
-        // If deadline is within 24 hours or has passed and notification hasn't been sent yet
         if (
           deadline <= now + 24 * 60 * 60 * 1000 &&
           deadline > now - 24 * 60 * 60 * 1000
         ) {
           try {
-            // Find the campaign owner's ID from the database
             const ownerResponse = await fetch(
               `${process.env.NEXT_PUBLIC_API_URL}/api/users/address/${campaign.owner}`,
               {
@@ -559,7 +426,6 @@ try {
             if (ownerResponse.ok) {
               const ownerData = await ownerResponse.json();
 
-              // Create deadline notification for the campaign owner
               await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/api/notifications`,
                 {
@@ -596,9 +462,7 @@ try {
       console.error("Failed to check campaign deadlines:", error);
     }
   };
-  // ...existing code...
 
-  // Add this function to handle campaign milestone checks after donations
   const checkCampaignMilestone = async (
     campaign,
     campaignTitle,
@@ -606,7 +470,6 @@ try {
     donationAmountWei
   ) => {
     try {
-      // Calculate campaign progress percentage
       const goalWei = ethers.parseEther(campaign.goal.toString());
       const raisedWithNewDonation =
         ethers.parseEther(campaign.raised.toString()) + donationAmountWei;
@@ -614,19 +477,15 @@ try {
         (raisedWithNewDonation * BigInt(100)) / goalWei
       );
 
-      // Define milestones (25%, 50%, 75%, 100%)
       const milestones = [25, 50, 75, 100];
 
-      // Check if a milestone was just crossed
       for (const milestone of milestones) {
         const previousProgress = Number(
           (ethers.parseEther(campaign.raised.toString()) * BigInt(100)) /
             goalWei
         );
 
-        // If we just crossed this milestone
         if (progressPercentage >= milestone && previousProgress < milestone) {
-          // Find the campaign owner's ID from the database
           const ownerResponse = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/api/users/address/${campaign.owner}`,
             {
@@ -639,7 +498,6 @@ try {
 
           if (ownerResponse.ok) {
             const ownerData = await ownerResponse.json();
-            // Create milestone notification for the campaign owner
             await fetch(
               `${process.env.NEXT_PUBLIC_API_URL}/api/notifications`,
               {
@@ -658,7 +516,6 @@ try {
             );
           }
 
-          // If we've reached 100%, send a completion notification
           if (milestone === 100) {
             await fetch(
               `${process.env.NEXT_PUBLIC_API_URL}/api/notifications`,
@@ -691,7 +548,6 @@ try {
         connect,
         campaigns,
         fetchCampaigns,
-        //getCampaignsByOwner,
         getUserCampaigns,
         userCampaigns,
         createCampaign,
